@@ -1,49 +1,25 @@
-const db = require('./db');
-const bcrypt = require('bcryptjs');
-
-// ✅ CREATE USERS TABLE FIRST
-db.prepare(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    email TEXT UNIQUE,
-    password_hash TEXT,
-    role_id INTEGER,
-    is_verified INTEGER
-  )
-`).run();
-
-// ✅ CREATE MARKS TABLE
-db.prepare(`
-  CREATE TABLE IF NOT EXISTS marks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    student_id INTEGER,
-    subject TEXT,
-    marks INTEGER
-  )
-`).run();
-
 const fs = require('fs');
 const path = require('path');
-const bcrypt = require('bcryptjs');
 const db = require('./db');
+const bcrypt = require('bcryptjs');
 
-// Load schema.sql first
+// ✅ Load schema.sql
 const schema = fs.readFileSync(
   path.join(__dirname, 'schema.sql'),
-  'utf8'
+  'utf-8'
 );
 
-// Create tables
+// ✅ Create all tables
 db.exec(schema);
 
 console.log('Tables created successfully.');
 
-// Check admin exists
+// ✅ Check admin exists
 const adminExists = db
   .prepare("SELECT * FROM users WHERE email = ?")
   .get('admin@edutrack.com');
 
+// ✅ Insert admin if not exists
 if (!adminExists) {
   const hash = bcrypt.hashSync('admin123', 12);
 

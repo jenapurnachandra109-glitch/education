@@ -392,7 +392,13 @@ router.post('/import', ...canManageMarks, async (req, res) => {
                     WHERE id = ?
                 `).run(name, student.user_id);
 
-                upsertMark.run(student.id, subject.id, marks, updatedBy);
+                const userId = req.session?.user?.id;
+
+                if (!userId) {
+                throw new Error("User not authenticated");
+                }
+
+                upsertMark.run(student.id, subject.id, marks, userId);
                 importSuccess.push(`${rollNo} - ${marks}`);
             } catch (err) {
                 importErrors.push(`Row ${index + 1}: ${err.message}`);
