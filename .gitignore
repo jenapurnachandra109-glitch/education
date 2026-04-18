@@ -1,0 +1,8 @@
+node_modules/
+database/edutrack.db
+.env
+public/uploads/*.jpg
+public/uploads/*.png
+public/uploads/*.jpeg
+public/uploads/*.webp
+!public/uploads/default.png

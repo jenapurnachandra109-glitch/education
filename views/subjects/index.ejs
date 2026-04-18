@@ -1,0 +1,100 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Subjects</h1>
+        <p class="page-sub"><%= subjects.length %> subject(s) found</p>
+    </div>
+    <% if (user.role === 'admin') { %>
+    <div class="page-actions">
+        <a href="/subjects/new" class="btn btn-primary">+ Add Subject</a>
+    </div>
+    <% } %>
+</div>
+
+<div class="filter-bar card" style="margin-bottom:1.5rem;padding:1rem 1.5rem">
+    <form method="GET" action="/subjects" class="filter-form">
+        <select name="branch_id" class="form-input form-input-sm">
+            <option value="">All Branches</option>
+            <% branches.forEach(b => { %>
+            <option value="<%= b.id %>" <%= filters.branch_id == b.id ? 'selected' : '' %>><%= b.code %></option>
+            <% }) %>
+        </select>
+        <select name="semester" class="form-input form-input-sm">
+            <option value="">All Semesters</option>
+            <% for (let i = 1; i <= 8; i++) { %>
+            <option value="<%= i %>" <%= filters.semester == i ? 'selected' : '' %>>Sem <%= i %></option>
+            <% } %>
+        </select>
+        <select name="type" class="form-input form-input-sm">
+            <option value="">All Types</option>
+            <option value="THEORY" <%= filters.type === 'THEORY' ? 'selected' : '' %>>Theory</option>
+            <option value="LAB" <%= filters.type === 'LAB' ? 'selected' : '' %>>Lab</option>
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+        <a href="/subjects" class="btn btn-ghost btn-sm">Reset</a>
+    </form>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Type</th>
+                    <th>Branch</th>
+                    <th>Sem</th>
+                    <th>Max Marks</th>
+                    <th>Professor</th>
+                    <th>Created By</th>
+                    <% if (user.role !== 'student') { %><th>Marks</th><% } %>
+                    <% if (user.role === 'admin') { %><th>Actions</th><% } %>
+                </tr>
+            </thead>
+            <tbody>
+            <% subjects.forEach(s => { %>
+                <tr>
+                    <td><strong><%= s.name %></strong></td>
+                    <td><span class="mono"><%= s.code %></span></td>
+                    <td>
+                        <span class="badge badge-<%= s.type === 'THEORY' ? 'admin' : 'professor' %>">
+                            <%= s.type %>
+                        </span>
+                    </td>
+                    <td><%= s.branch_code %></td>
+                    <td><%= s.semester %></td>
+                    <td><%= s.max_marks %></td>
+                    <td class="text-muted text-sm"><%= s.professor_name || 'Not assigned' %></td>
+                    <td class="text-muted text-sm"><%= s.creator_name || 'System' %></td>
+                    <% if (user.role !== 'student') { %>
+                    <td>
+                        <a href="/marks/bulk/<%= s.id %>" class="btn btn-xs btn-primary">Marks</a>
+                    </td>
+                    <% } %>
+                    <% if (user.role === 'admin') { %>
+                    <td>
+                        <div class="action-btns">
+                            <a href="/subjects/<%= s.id %>/edit" class="btn btn-xs btn-outline">Edit</a>
+                            <form method="POST" action="/subjects/<%= s.id %>/delete" onsubmit="return confirm('Delete subject?')" style="display:inline">
+                                <button class="btn btn-xs btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                    <% } %>
+                </tr>
+            <% }) %>
+            <% if (!subjects.length) { %>
+            <tr>
+                <td colspan="<%= user.role === 'admin' ? 10 : (user.role === 'professor' ? 9 : 8) %>" class="text-center text-muted" style="padding:3rem">
+                    No subjects found
+                </td>
+            </tr>
+            <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,222 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Bulk Marks Entry</h1>
+        <p class="page-sub">
+            <span class="badge badge-<%= subject.type === 'THEORY' ? 'admin' : 'professor' %>"><%= subject.type %></span>
+            &nbsp;<%= subject.name %> &middot; <%= subject.branch_name %> &middot; Semester <%= subject.semester %> &middot; Max: <%= subject.max_marks %>
+        </p>
+    </div>
+    <div class="page-actions">
+        <a href="/marks/export/excel/<%= subject.id %>" class="btn btn-outline">Export Excel</a>
+        <a href="/subjects" class="btn btn-ghost">&larr; Subjects</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Students (<%= students.length %>)</h3>
+        <div style="display:flex;gap:.75rem;align-items:center">
+            <input
+                type="text"
+                id="bulkSearch"
+                class="form-input"
+                placeholder="Search..."
+                style="width:180px"
+                oninput="filterRows()"
+            >
+            <button class="btn btn-primary btn-sm" type="button" onclick="saveAll()">Save All Marks</button>
+        </div>
+    </div>
+
+    <% if (students.length) { %>
+    <div class="table-wrap">
+        <table class="data-table" id="bulkTable">
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Marks <span class="text-muted">(max <%= subject.max_marks %>)</span></th>
+                    <th>Percentage</th>
+                    <th>Grade</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="bulkBody">
+                <% students.forEach(s => { %>
+                    <%
+                        const hasMark = s.marks !== null;
+                        const pct = hasMark ? (s.marks / subject.max_marks * 100).toFixed(1) : null;
+                        const grade = pct !== null ? (pct >= 90 ? 'O' : pct >= 80 ? 'A' : pct >= 70 ? 'B' : pct >= 60 ? 'C' : pct >= 50 ? 'D' : 'F') : 'NA';
+                        const pctClass = pct !== null ? (pct >= 75 ? 'pct-good' : pct >= 50 ? 'pct-mid' : 'pct-low') : '';
+                    %>
+                    <tr class="bulk-row" data-id="<%= s.student_id %>">
+                        <td><span class="mono"><%= s.roll_no %></span></td>
+                        <td><strong><%= s.name %></strong></td>
+                        <td>
+                            <input
+                                type="number"
+                                class="marks-input bulk-input"
+                                id="inp-<%= s.student_id %>"
+                                value="<%= hasMark ? s.marks : '' %>"
+                                min="0"
+                                max="<%= subject.max_marks %>"
+                                step="0.5"
+                                placeholder="-"
+                                data-id="<%= s.student_id %>"
+                                oninput="recalc(this)"
+                            >
+                        </td>
+                        <td id="pct-<%= s.student_id %>">
+                            <% if (pct !== null) { %>
+                                <span class="pct-val <%= pctClass %>"><%= pct %>%</span>
+                            <% } else { %>
+                                <span class="text-muted">-</span>
+                            <% } %>
+                        </td>
+                        <td id="grade-<%= s.student_id %>">
+                            <span class="grade-chip grade-<%= grade %>"><%= grade %></span>
+                        </td>
+                        <td id="st-<%= s.student_id %>">
+                            <% if (hasMark) { %>
+                                <span style="color:#27ae60;font-size:.8rem">Saved</span>
+                            <% } else { %>
+                                <span class="text-muted" style="font-size:.8rem">-</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <form method="POST" action="/marks/bulk/<%= subject.id %>" id="bulkForm">
+        <input type="hidden" name="marks_data" id="marksDataField">
+    </form>
+
+    <div class="bulk-footer">
+        <span class="text-muted text-sm" id="countLabel">
+            <%= students.filter(s => s.marks !== null).length %> of <%= students.length %> marks entered
+        </span>
+        <button class="btn btn-primary" type="button" onclick="saveAll()">Save All Marks</button>
+    </div>
+    <% } else { %>
+    <div class="empty-state">
+        <div class="empty-icon">Students</div>
+        <p>No students enrolled in this branch and semester.</p>
+    </div>
+    <% } %>
+</div>
+
+<style>
+.bulk-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    background: #fafbfd;
+}
+
+.bulk-input {
+    width: 90px;
+}
+
+.pct-good {
+    color: #27ae60;
+}
+
+.pct-mid {
+    color: #f39c12;
+}
+
+.pct-low {
+    color: #e74c3c;
+}
+</style>
+
+<script>
+const MAX_MARKS = Number("<%= subject.max_marks %>");
+
+function recalc(input) {
+    const id = input.dataset.id;
+    const val = parseFloat(input.value);
+    const pctEl = document.getElementById('pct-' + id);
+    const gradeEl = document.getElementById('grade-' + id);
+    const stEl = document.getElementById('st-' + id);
+
+    if (isNaN(val) || input.value === '') {
+        pctEl.innerHTML = '<span class="text-muted">-</span>';
+        gradeEl.innerHTML = '<span class="grade-chip grade-NA">NA</span>';
+        stEl.innerHTML = '<span class="text-muted" style="font-size:.8rem">-</span>';
+        input.style.borderColor = '';
+        updateCount();
+        return;
+    }
+
+    if (val < 0 || val > MAX_MARKS) {
+        input.style.borderColor = '#ef4444';
+        stEl.innerHTML = '<span style="color:#ef4444;font-size:.8rem">0-' + MAX_MARKS + ' only</span>';
+        return;
+    }
+
+    input.style.borderColor = '';
+
+    const pct = (val / MAX_MARKS * 100).toFixed(1);
+    const grade = pct >= 90 ? 'O' : pct >= 80 ? 'A' : pct >= 70 ? 'B' : pct >= 60 ? 'C' : pct >= 50 ? 'D' : 'F';
+    const color = pct >= 75 ? '#27ae60' : pct >= 50 ? '#f39c12' : '#e74c3c';
+
+    pctEl.innerHTML = '<span style="color:' + color + '">' + pct + '%</span>';
+    gradeEl.innerHTML = '<span class="grade-chip grade-' + grade + '">' + grade + '</span>';
+    stEl.innerHTML = '<span style="color:#f59e0b;font-size:.8rem">Unsaved</span>';
+
+    updateCount();
+}
+
+function updateCount() {
+    const total = document.querySelectorAll('.bulk-input').length;
+    const entered = Array.from(document.querySelectorAll('.bulk-input')).filter(i => i.value !== '').length;
+    document.getElementById('countLabel').textContent = entered + ' of ' + total + ' marks entered';
+}
+
+function saveAll() {
+    const inputs = document.querySelectorAll('.bulk-input');
+    const data = [];
+    let invalid = false;
+
+    inputs.forEach(inp => {
+        const val = parseFloat(inp.value);
+        if (inp.value !== '') {
+            if (isNaN(val) || val < 0 || val > MAX_MARKS) {
+                inp.style.borderColor = '#ef4444';
+                invalid = true;
+            } else {
+                data.push({ student_id: inp.dataset.id, marks: val });
+            }
+        }
+    });
+
+    if (invalid) {
+        alert('Some marks are out of range (0-' + MAX_MARKS + '). Please correct them before saving.');
+        return;
+    }
+
+    if (data.length === 0) {
+        alert('No marks to save. Please enter at least one value.');
+        return;
+    }
+
+    document.getElementById('marksDataField').value = JSON.stringify(data);
+    document.getElementById('bulkForm').submit();
+}
+
+function filterRows() {
+    const q = document.getElementById('bulkSearch').value.toLowerCase();
+    document.querySelectorAll('.bulk-row').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+</script>
+
+<%- include('../partials/footer') %>

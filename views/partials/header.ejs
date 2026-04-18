@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> – EduTrack</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+</head>
+<body class="app-body">
+
+<nav class="navbar">
+    <div class="nav-brand">
+        <span class="brand-icon">◈</span>
+        <span class="brand-text">EduTrack</span>
+    </div>
+    <div class="nav-links">
+        <% if (user) { %>
+            <% if (user.role === 'admin') { %>
+                <a href="/admin/dashboard" class="nav-link">Dashboard</a>
+                <a href="/subjects" class="nav-link">Subjects</a>
+                <a href="/admin/users" class="nav-link">Users</a>
+                <a href="/admin/branches" class="nav-link">Branches</a>
+                <a href="/admin/analytics" class="nav-link">Analytics</a>
+            <% } else if (user.role === 'professor') { %>
+                <a href="/professor/dashboard" class="nav-link">Dashboard</a>
+                <a href="/subjects" class="nav-link">Subjects</a>
+                <a href="/marks/import" class="nav-link">Import</a>
+            <% } else { %>
+                <a href="/student/dashboard" class="nav-link">My Results</a>
+                <a href="/subjects" class="nav-link">Subjects</a>
+            <% } %>
+        <% } %>
+    </div>
+    <% if (user) { %>
+    <div class="nav-user">
+        <a href="/notifications" class="notif-bell" id="notifBell">
+            🔔 <span class="notif-badge" id="notifCount" style="display:none"></span>
+        </a>
+        <a href="/profile" class="nav-avatar">
+            <img src="/uploads/<%= user.photo || 'default.png' %>" alt="<%= user.name %>">
+            <span><%= user.name.split(' ')[0] %></span>
+        </a>
+        <a href="/logout" class="nav-logout">Sign Out</a>
+    </div>
+    <% } %>
+</nav>
+
+<div class="flash-container">
+    <% if (success && success.length) { %><div class="flash flash-success"><%= success %></div><% } %>
+    <% if (error && error.length)   { %><div class="flash flash-error"><%= error %></div><% } %>
+    <% if (info && info.length)     { %><div class="flash flash-info"><%= info %></div><% } %>
+</div>
+
+<main class="main-content">

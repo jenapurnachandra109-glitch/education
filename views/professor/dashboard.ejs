@@ -1,0 +1,69 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Professor Dashboard</h1>
+        <p class="page-sub">Welcome back, <%= user.name.split(' ')[0] %></p>
+    </div>
+    <div class="page-actions">
+        <a href="/marks/import" class="btn btn-primary">Import CSV</a>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom:2rem">
+    <div class="card-header">
+        <h3 class="card-title">My Subjects (<%= subjects.length %>)</h3>
+        <a href="/subjects" class="link-accent text-sm">View all →</a>
+    </div>
+
+    <% if (subjects.length) { %>
+    <div class="subject-cards-grid">
+        <% subjects.forEach(sub => { %>
+        <div class="subject-card subject-<%= sub.type.toLowerCase() %>">
+            <div class="subject-card-top">
+                <span class="subject-type-tag"><%= sub.type %></span>
+                <span class="subject-code"><%= sub.code %></span>
+            </div>
+            <h4 class="subject-name"><%= sub.name %></h4>
+            <p class="subject-meta"><%= sub.branch_name %> · Sem <%= sub.semester %></p>
+            <p class="subject-meta">Max Marks: <strong><%= sub.max_marks %></strong></p>
+            <div class="subject-card-actions">
+                <a href="/professor/subject/<%= sub.id %>/students" class="btn btn-sm btn-primary">Enter Marks</a>
+                <a href="/marks/export/excel/<%= sub.id %>" class="btn btn-sm btn-outline">Export</a>
+            </div>
+        </div>
+        <% }) %>
+    </div>
+    <% } else { %>
+    <div class="empty-state">
+        <div class="empty-icon">Books</div>
+        <p>No subjects have been assigned to you yet.</p>
+    </div>
+    <% } %>
+</div>
+
+<div class="card">
+    <div class="card-header"><h3 class="card-title">Recent Mark Updates</h3></div>
+    <% if (recentMarks.length) { %>
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead><tr><th>Student</th><th>Roll No</th><th>Subject</th><th>Marks</th><th>Updated</th></tr></thead>
+            <tbody>
+            <% recentMarks.forEach(m => { %>
+                <tr>
+                    <td><strong><%= m.name %></strong></td>
+                    <td class="text-muted"><%= m.roll_no %></td>
+                    <td><%= m.subject %></td>
+                    <td><strong><%= m.marks %></strong>/<%= m.max_marks %></td>
+                    <td class="text-sm text-muted"><%= new Date(m.updated_at * 1000).toLocaleString() %></td>
+                </tr>
+            <% }) %>
+            </tbody>
+        </table>
+    </div>
+    <% } else { %>
+    <p class="text-muted text-center" style="padding:2rem">No marks entered yet</p>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,117 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title"><%= subject ? 'Edit Subject' : 'New Subject' %></h1>
+        <p class="page-sub"><%= subject ? 'Update subject details' : 'Add a new subject to the system' %></p>
+    </div>
+    <a href="/subjects" class="btn btn-ghost">← Back to Subjects</a>
+</div>
+
+<div class="card" style="max-width:680px">
+    <form method="POST" action="<%= subject ? '/subjects/' + subject.id + '/update' : '/subjects' %>" class="form-stacked">
+        <div class="form-group">
+            <label class="form-label">Subject Name <span class="req">*</span></label>
+            <input
+                type="text"
+                name="name"
+                class="form-input"
+                value="<%= subject ? subject.name : '' %>"
+                placeholder="e.g. Data Structures and Algorithms"
+                required
+            >
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Subject Code <span class="req">*</span></label>
+                <input
+                    type="text"
+                    name="code"
+                    class="form-input"
+                    value="<%= subject ? subject.code : '' %>"
+                    placeholder="e.g. CS301"
+                    required
+                    style="text-transform:uppercase"
+                >
+            </div>
+            <div class="form-group">
+                <label class="form-label">Subject Type <span class="req">*</span></label>
+                <select name="type" class="form-input" required>
+                    <option value="THEORY" <%= (!subject || subject.type === 'THEORY') ? 'selected' : '' %>>Theory</option>
+                    <option value="LAB" <%= (subject && subject.type === 'LAB') ? 'selected' : '' %>>Lab</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Branch <span class="req">*</span></label>
+                <select name="branch_id" class="form-input" required>
+                    <% branches.forEach(b => { %>
+                    <option value="<%= b.id %>" <%= (subject && subject.branch_id == b.id) ? 'selected' : '' %>>
+                        <%= b.name %> (<%= b.code %>)
+                    </option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Semester <span class="req">*</span></label>
+                <select name="semester" class="form-input" required>
+                    <% for (let i = 1; i <= 8; i++) { %>
+                    <option value="<%= i %>" <%= (subject && subject.semester == i) ? 'selected' : '' %>>
+                        Semester <%= i %>
+                    </option>
+                    <% } %>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Maximum Marks <span class="req">*</span></label>
+                <input
+                    type="number"
+                    name="max_marks"
+                    class="form-input"
+                    value="<%= subject ? subject.max_marks : 100 %>"
+                    min="1"
+                    max="1000"
+                    required
+                >
+                <small class="form-hint">The total marks this subject is graded out of</small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Professor <span class="req">*</span></label>
+                <% if (user && user.role === 'professor') { %>
+                    <input type="hidden" name="professor_id" value="<%= user.id %>">
+                    <input
+                        type="text"
+                        class="form-input"
+                        value="<%= user.name %>"
+                        disabled
+                    >
+                <% } else { %>
+                    <select name="professor_id" class="form-input" required>
+                        <option value="">Select Professor</option>
+                        <% professors.forEach(p => { %>
+                        <option value="<%= p.id %>" <%= (subject && subject.professor_id == p.id) ? 'selected' : '' %>>
+                            <%= p.name %><%= p.employee_id ? ' (' + p.employee_id + ')' : '' %>
+                        </option>
+                        <% }) %>
+                    </select>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <%= subject ? 'Update Subject' : 'Create Subject' %>
+            </button>
+            <a href="/subjects" class="btn btn-ghost">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<%- include('../partials/footer') %>

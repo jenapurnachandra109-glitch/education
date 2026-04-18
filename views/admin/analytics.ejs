@@ -1,0 +1,147 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">System Analytics</h1>
+        <p class="page-sub">Performance insights across all branches</p>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom:2rem">
+    <div class="card-header"><h3 class="card-title">Branch-wise Performance</h3></div>
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Branch</th>
+                    <th>Code</th>
+                    <th>Students</th>
+                    <th>Avg Marks</th>
+                    <th>Avg %</th>
+                    <th>Performance</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% byBranch.forEach(b => { %>
+                <% const pct = b.avg_pct || 0; %>
+                <% const barClass = pct >= 75 ? 'bar-good' : pct >= 50 ? 'bar-mid' : 'bar-low'; %>
+                <tr>
+                    <td><strong><%= b.branch %></strong></td>
+                    <td><span class="badge badge-admin"><%= b.code %></span></td>
+                    <td><%= b.students %></td>
+                    <td>
+                        <% if (b.avg_marks !== null && b.avg_marks !== undefined) { %>
+                            <strong><%= b.avg_marks %></strong>
+                        <% } else { %>
+                            <span class="text-muted">-</span>
+                        <% } %>
+                    </td>
+                    <td>
+                        <% if (b.avg_pct !== null && b.avg_pct !== undefined) { %>
+                            <strong class="<%= barClass %>"><%= b.avg_pct %>%</strong>
+                        <% } else { %>
+                            <span class="text-muted">-</span>
+                        <% } %>
+                    </td>
+                    <td style="width:200px">
+                        <div class="mini-bar-track">
+                            <div
+                                class="mini-bar-fill <%= barClass %>"
+                                data-width="<%= Math.min(pct, 100) %>"
+                            ></div>
+                        </div>
+                    </td>
+                </tr>
+            <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><h3 class="card-title">Top Performing Students</h3></div>
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Roll No</th>
+                    <th>Branch</th>
+                    <th>Sem</th>
+                    <th>Total Marks</th>
+                    <th>Avg %</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% topStudents.forEach((s, i) => { %>
+                <% const avgPct = s.avg_pct || 0; %>
+                <% const grade = avgPct >= 90 ? 'O' : avgPct >= 80 ? 'A' : avgPct >= 70 ? 'B' : avgPct >= 60 ? 'C' : avgPct >= 50 ? 'D' : 'F'; %>
+                <tr>
+                    <td><span class="text-muted">#<%= i + 1 %></span></td>
+                    <td><strong><%= s.name %></strong></td>
+                    <td class="text-muted"><%= s.roll_no %></td>
+                    <td><span class="badge badge-admin"><%= s.branch %></span></td>
+                    <td><%= s.semester %></td>
+                    <td>
+                        <% if (s.total_marks !== null && s.total_marks !== undefined) { %>
+                            <strong><%= s.total_marks %></strong>
+                            <% if (s.total_max_marks) { %>
+                                <span class="text-muted">/ <%= s.total_max_marks %></span>
+                            <% } %>
+                        <% } else { %>
+                            <span class="text-muted">-</span>
+                        <% } %>
+                    </td>
+                    <td>
+                        <% if (s.avg_pct !== null && s.avg_pct !== undefined) { %>
+                            <strong><%= s.avg_pct %>%</strong>
+                        <% } else { %>
+                            <span class="text-muted">-</span>
+                        <% } %>
+                    </td>
+                    <td><span class="grade-chip grade-<%= grade %>"><%= grade %></span></td>
+                </tr>
+            <% }) %>
+            <% if (!topStudents.length) { %>
+                <tr><td colspan="8" class="text-center text-muted" style="padding:3rem">No marks data yet</td></tr>
+            <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.bar-good {
+    color: #27ae60;
+}
+
+.bar-mid {
+    color: #f39c12;
+}
+
+.bar-low {
+    color: #e74c3c;
+}
+
+.mini-bar-fill.bar-good {
+    background: #27ae60;
+}
+
+.mini-bar-fill.bar-mid {
+    background: #f39c12;
+}
+
+.mini-bar-fill.bar-low {
+    background: #e74c3c;
+}
+</style>
+
+<script>
+document.querySelectorAll('.mini-bar-fill[data-width]').forEach(el => {
+    el.style.width = (Number(el.dataset.width) || 0) + '%';
+});
+</script>
+
+<%- include('../partials/footer') %>

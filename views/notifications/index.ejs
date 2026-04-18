@@ -1,0 +1,33 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🔔 Notifications</h1>
+        <p class="page-sub">Your recent activity and alerts</p>
+    </div>
+</div>
+
+<div class="card" style="max-width:760px">
+    <% if (notifications.length) { %>
+    <div class="notif-list notif-list-full">
+        <% notifications.forEach(n => { %>
+        <div class="notif-item <%= n.is_read ? '' : 'notif-unread' %>">
+            <span class="notif-dot"></span>
+            <div class="notif-content">
+                <p class="notif-msg"><%= n.message %></p>
+                <span class="notif-time"><%= new Date(n.created_at * 1000).toLocaleString() %></span>
+            </div>
+            <% if (!n.is_read) { %><span class="new-tag">NEW</span><% } %>
+        </div>
+        <% }) %>
+    </div>
+    <% } else { %>
+    <div class="empty-state">
+        <div class="empty-icon">🔕</div>
+        <p>No notifications yet.</p>
+        <p class="text-muted text-sm">You'll be notified when marks are updated.</p>
+    </div>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>

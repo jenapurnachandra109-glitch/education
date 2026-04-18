@@ -1,0 +1,113 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Import Marks via CSV</h1>
+        <p class="page-sub">Bulk upload student marks from a CSV file</p>
+    </div>
+    <a href="/professor/dashboard" class="btn btn-ghost">← Back</a>
+</div>
+
+<div class="two-col-layout">
+    <!-- Upload Card -->
+    <div>
+        <div class="card" style="margin-bottom:1.5rem">
+            <div class="card-header"><h3 class="card-title">Upload CSV / Excel File</h3></div>
+            <form method="POST" action="/marks/import" enctype="multipart/form-data" class="form-stacked">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">📥</div>
+                    <p class="upload-text">Drag & drop CSV here or click to browse</p>
+                    <input type="file" name="file" accept=".csv,.xlsx,.xls" class="upload-input" id="csvFile" required onchange="showFilename(this)">
+                    <p class="upload-filename" id="uploadFilename"></p>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full" style="margin-top:1rem">Upload and Import</button>
+            </form>
+        </div>
+
+        <!-- Format Guide -->
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">📋 CSV Format</h3></div>
+            <p class="text-muted" style="margin-bottom:1rem">Your CSV must have these exact column headers:</p>
+            <div class="code-block">name,roll_no,subject,marks
+John Doe,CSE2024001,CS301,87
+Jane Smith,CSE2024002,CS301,92
+Alex Kumar,CSE2024003,CS302,78</div>
+            <ul class="format-tips">
+                <li><strong>name</strong> – Student full name (used for auto-create)</li>
+                <li><strong>roll_no</strong> – Unique roll number (required)</li>
+                <li><strong>subject</strong> – Subject code (must exist in system)</li>
+                <li><strong>marks</strong> – Numeric marks value</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div>
+        <% if (typeof importErrors !== 'undefined' && (importErrors.length || importSuccess.length)) { %>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Import Results</h3></div>
+            <% if (importSuccess.length) { %>
+            <div class="result-block result-success">
+                <strong>✅ <%= importSuccess.length %> record(s) imported successfully</strong>
+                <div class="result-list">
+                    <% importSuccess.forEach(r => { %><span class="result-tag"><%= r %></span><% }) %>
+                </div>
+            </div>
+            <% } %>
+            <% if (importErrors.length) { %>
+            <div class="result-block result-error">
+                <strong>⚠️ <%= importErrors.length %> error(s) found</strong>
+                <ul class="error-list">
+                    <% importErrors.forEach(e => { %><li><%= e %></li><% }) %>
+                </ul>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+
+        <!-- Subject reference -->
+        <div class="card <%= typeof importErrors !== 'undefined' ? 'mt-24' : '' %>">
+            <div class="card-header"><h3 class="card-title">Subject Codes Reference</h3></div>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Code</th><th>Name</th><th>Branch</th><th>Sem</th></tr></thead>
+                    <tbody>
+                    <% subjects.forEach(s => { %>
+                        <tr>
+                            <td><span class="mono"><%= s.code %></span></td>
+                            <td><%= s.name %></td>
+                            <td><%= s.branch_code %></td>
+                            <td><%= s.semester %></td>
+                        </tr>
+                    <% }) %>
+                    <% if (!subjects.length) { %>
+                        <tr><td colspan="4" class="text-center text-muted">No subjects yet</td></tr>
+                    <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showFilename(input) {
+    const el = document.getElementById('uploadFilename');
+    el.textContent = input.files[0] ? '📄 ' + input.files[0].name : '';
+}
+// Drag-drop highlight
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+        document.getElementById('csvFile').files = e.dataTransfer.files;
+        document.getElementById('uploadFilename').textContent = '📄 ' + file.name;
+    }
+});
+zone.addEventListener('click', () => document.getElementById('csvFile').click());
+</script>
+
+<%- include('../partials/footer') %>

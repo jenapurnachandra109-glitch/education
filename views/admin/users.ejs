@@ -1,0 +1,80 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">User Management</h1>
+        <p class="page-sub"><%= users.length %> registered users</p>
+    </div>
+    <div class="page-actions">
+        <input type="text" id="userSearch" class="form-input" placeholder="🔍  Search users…" style="width:240px" oninput="filterUsers()">
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table class="data-table" id="usersTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Verified</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% users.forEach((u, i) => { %>
+                <tr class="user-row">
+                    <td class="text-muted"><%= i + 1 %></td>
+                    <td>
+                        <div class="user-cell">
+                            <img src="/uploads/<%= u.profile_photo || 'default.png' %>" class="avatar-sm" alt="">
+                            <strong><%= u.name %></strong>
+                        </div>
+                    </td>
+                    <td class="text-muted"><%= u.email %></td>
+                    <td><span class="badge badge-<%= u.role %>"><%= u.role %></span></td>
+                    <td>
+                        <% if (u.is_verified) { %>
+                            <span class="status-dot green"></span> Verified
+                        <% } else { %>
+                            <span class="status-dot red"></span> Pending
+                        <% } %>
+                    </td>
+                    <td class="text-sm text-muted"><%= new Date(u.created_at * 1000).toLocaleDateString() %></td>
+                    <td>
+                        <div class="action-btns">
+                            <form method="POST" action="/admin/users/<%= u.id %>/verify" style="display:inline">
+                                <button class="btn btn-xs btn-outline" title="Toggle verification">
+                                    <%= u.is_verified ? '🔒 Unverify' : '✅ Verify' %>
+                                </button>
+                            </form>
+                            <% if (u.id !== user.id) { %>
+                            <form method="POST" action="/admin/users/<%= u.id %>/delete" onsubmit="return confirm('Delete this user?')" style="display:inline">
+                                <button class="btn btn-xs btn-danger">🗑 Delete</button>
+                            </form>
+                            <% } %>
+                        </div>
+                    </td>
+                </tr>
+            <% }) %>
+            <% if (!users.length) { %>
+                <tr><td colspan="7" class="text-center text-muted" style="padding:3rem">No users found</td></tr>
+            <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterUsers() {
+    const q = document.getElementById('userSearch').value.toLowerCase();
+    document.querySelectorAll('.user-row').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+</script>
+
+<%- include('../partials/footer') %>

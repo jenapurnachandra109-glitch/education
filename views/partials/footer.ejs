@@ -1,0 +1,31 @@
+</main>
+
+<footer class="site-footer">
+    <p>© 2024 EduTrack · Student Performance Management System</p>
+</footer>
+
+<script>
+// Notification badge updater
+async function updateNotifCount() {
+    try {
+        const r = await fetch('/notifications/unread-count');
+        const { count } = await r.json();
+        const badge = document.getElementById('notifCount');
+        if (badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'inline' : 'none';
+        }
+    } catch {}
+}
+if (document.getElementById('notifBell')) {
+    updateNotifCount();
+    setInterval(updateNotifCount, 30000);
+}
+
+// Auto-dismiss flash messages
+setTimeout(() => {
+    document.querySelectorAll('.flash').forEach(el => el.style.opacity = '0');
+}, 4000);
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login – EduTrack</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+</head>
+<body class="auth-body">
+
+<div class="auth-split">
+    <!-- Left panel -->
+    <div class="auth-panel-left">
+        <div class="auth-brand">
+            <span class="brand-icon-lg">◈</span>
+            <h1 class="brand-name-lg">EduTrack</h1>
+        </div>
+        <p class="auth-tagline">Student Performance<br><em>Management System</em></p>
+        <div class="auth-features">
+            <div class="auth-feature-item">📊 Real-time analytics</div>
+            <div class="auth-feature-item">🎓 Role-based dashboards</div>
+            <div class="auth-feature-item">📥 CSV import & PDF export</div>
+            <div class="auth-feature-item">🔔 Instant notifications</div>
+        </div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="auth-panel-right">
+        <div class="auth-card">
+            <h2 class="auth-title">Welcome back</h2>
+            <p class="auth-subtitle">Sign in to your account</p>
+
+            <% if (success && success.length) { %>
+                <div class="flash flash-success"><%= success %></div>
+            <% } %>
+            <% if (error && error.length) { %>
+                <div class="flash flash-error"><%= error %></div>
+            <% } %>
+            <% if (info && info.length) { %>
+                <div class="flash flash-info"><%= info %></div>
+            <% } %>
+
+            <form method="POST" action="/login" class="auth-form">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-input" placeholder="you@example.com" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-eye-wrap">
+                        <input type="password" name="password" id="pwdField" class="form-input" placeholder="••••••••" required>
+                        <button type="button" class="eye-btn" onclick="togglePwd()">👁</button>
+                    </div>
+                </div>
+                <div class="form-row-between">
+                    <label class="checkbox-label">
+                        <input type="checkbox"> Remember me
+                    </label>
+                    <a href="/forgot-password" class="link-muted">Forgot password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+            </form>
+
+            <p class="auth-switch">Don't have an account? <a href="/register" class="link-accent">Register here</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePwd() {
+    const f = document.getElementById('pwdField');
+    f.type = f.type === 'password' ? 'text' : 'password';
+}
+</script>
+</body>
+</html>

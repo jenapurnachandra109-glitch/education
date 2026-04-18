@@ -1,0 +1,137 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title"><%= subject.name %></h1>
+        <p class="page-sub">
+            <span class="badge badge-<%= subject.type === 'THEORY' ? 'admin' : 'professor' %>"><%= subject.type %></span>
+            &nbsp;<%= subject.branch_name %> · Semester <%= subject.semester %> · Max: <%= subject.max_marks %>
+        </p>
+    </div>
+    <div class="page-actions">
+        <a href="/marks/export/excel/<%= subject.id %>" class="btn btn-outline">📊 Export Excel</a>
+        <a href="/marks/import" class="btn btn-outline">📥 Import CSV</a>
+        <a href="/professor/dashboard" class="btn btn-ghost">← Back</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Students (<%= students.length %>)</h3>
+        <input type="text" id="stuSearch" class="form-input" placeholder="🔍 Search…" style="width:200px" oninput="filterStudents()">
+    </div>
+
+    <% if (students.length) { %>
+    <div class="table-wrap">
+        <table class="data-table" id="stuTable">
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Marks (/ <%= subject.max_marks %>)</th>
+                    <th>Percentage</th>
+                    <th>Grade</th>
+                    <th>Last Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% students.forEach(s => { %>
+                <% const pct = s.marks !== null ? (s.marks / subject.max_marks * 100).toFixed(1) : null; %>
+                <% const grade = pct !== null ? (pct>=90?'O':pct>=80?'A':pct>=70?'B':pct>=60?'C':pct>=50?'D':'F') : '—'; %>
+                <tr class="stu-row" data-id="<%= s.student_id %>">
+                    <td><span class="mono"><%= s.roll_no %></span></td>
+                    <td><strong><%= s.name %></strong></td>
+                    <td>
+                        <div class="marks-inline">
+                            <input type="number"
+                                class="marks-input"
+                                value="<%= s.marks !== null ? s.marks : '' %>"
+                                min="0" max="<%= subject.max_marks %>"
+                                step="0.5"
+                                placeholder="—"
+                                data-student="<%= s.student_id %>"
+                                data-subject="<%= subject.id %>"
+                                onchange="saveMarks(this)">
+                            <span class="save-status" id="status-<%= s.student_id %>"></span>
+                        </div>
+                    </td>
+                    <td class="pct-cell" id="pct-<%= s.student_id %>">
+                        <% if (pct !== null) { %>
+                            <span style="color:<%= pct>=75?'#27ae60':pct>=50?'#f39c12':'#e74c3c' %>"><%= pct %>%</span>
+                        <% } else { %><span class="text-muted">—</span><% } %>
+                    </td>
+                    <td class="grade-cell" id="grade-<%= s.student_id %>">
+                        <span class="grade-chip grade-<%= grade %>"><%= grade %></span>
+                    </td>
+                    <td class="text-sm text-muted">
+                        <% if (s.updated_at) { %>
+                            <%= new Date(s.updated_at * 1000).toLocaleString() %>
+                        <% } else { %><span>—</span><% } %>
+                    </td>
+                </tr>
+            <% }) %>
+            </tbody>
+        </table>
+    </div>
+    <% } else { %>
+    <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <p>No students found for this branch and semester.</p>
+    </div>
+    <% } %>
+</div>
+
+<script>
+const MAX = <%= subject.max_marks %>;
+
+async function saveMarks(input) {
+    const studentId = input.dataset.student;
+    const subjectId = input.dataset.subject;
+    const marks     = input.value;
+    const status    = document.getElementById('status-' + studentId);
+
+    if (marks === '') return;
+    if (parseFloat(marks) < 0 || parseFloat(marks) > MAX) {
+        status.textContent = `⚠ 0–${MAX}`;
+        status.style.color = '#e74c3c';
+        return;
+    }
+
+    status.textContent = '⏳';
+    status.style.color = '#999';
+
+    try {
+        const res = await fetch('/marks/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: studentId, subject_id: subjectId, marks })
+        });
+        const data = await res.json();
+        if (data.success) {
+            status.textContent = '✓';
+            status.style.color = '#27ae60';
+            // Update pct & grade cells
+            document.getElementById('pct-' + studentId).innerHTML =
+                `<span style="color:${data.pct>=75?'#27ae60':data.pct>=50?'#f39c12':'#e74c3c'}">${data.pct}%</span>`;
+            document.getElementById('grade-' + studentId).innerHTML =
+                `<span class="grade-chip grade-${data.grade}">${data.grade}</span>`;
+            setTimeout(() => status.textContent = '', 2000);
+        } else {
+            status.textContent = '⚠ ' + (data.error || 'Error');
+            status.style.color = '#e74c3c';
+        }
+    } catch {
+        status.textContent = '⚠ Network error';
+        status.style.color = '#e74c3c';
+    }
+}
+
+function filterStudents() {
+    const q = document.getElementById('stuSearch').value.toLowerCase();
+    document.querySelectorAll('.stu-row').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+</script>
+
+<%- include('../partials/footer') %>

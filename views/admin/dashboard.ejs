@@ -1,0 +1,123 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Admin Dashboard</h1>
+        <p class="page-sub">System overview and recent activity</p>
+    </div>
+    <div class="page-actions">
+        <a href="/subjects/new" class="btn btn-primary">+ New Subject</a>
+        <a href="/admin/branches" class="btn btn-outline">Manage Branches</a>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card stat-blue">
+        <div class="stat-icon">🎓</div>
+        <div class="stat-body">
+            <div class="stat-value"><%= stats.students %></div>
+            <div class="stat-label">Total Students</div>
+        </div>
+    </div>
+    <div class="stat-card stat-green">
+        <div class="stat-icon">👨‍🏫</div>
+        <div class="stat-body">
+            <div class="stat-value"><%= stats.professors %></div>
+            <div class="stat-label">Professors</div>
+        </div>
+    </div>
+    <div class="stat-card stat-orange">
+        <div class="stat-icon">📚</div>
+        <div class="stat-body">
+            <div class="stat-value"><%= stats.subjects %></div>
+            <div class="stat-label">Subjects</div>
+        </div>
+    </div>
+    <div class="stat-card stat-purple">
+        <div class="stat-icon">🏫</div>
+        <div class="stat-body">
+            <div class="stat-value"><%= stats.branches %></div>
+            <div class="stat-label">Branches</div>
+        </div>
+    </div>
+</div>
+
+<div class="two-col-layout">
+    <!-- Recent Users -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Recent Registrations</h3>
+            <a href="/admin/users" class="link-accent text-sm">View all →</a>
+        </div>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr>
+                </thead>
+                <tbody>
+                    <% recent.forEach(u => { %>
+                    <tr>
+                        <td><strong><%= u.name %></strong></td>
+                        <td class="text-muted"><%= u.email %></td>
+                        <td><span class="badge badge-<%= u.role %>"><%= u.role %></span></td>
+                        <td class="text-muted text-sm"><%= new Date(u.created_at * 1000).toLocaleDateString() %></td>
+                    </tr>
+                    <% }) %>
+                    <% if (!recent.length) { %>
+                    <tr><td colspan="4" class="text-center text-muted">No users yet</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Grade Distribution -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Grade Distribution</h3>
+            <a href="/admin/analytics" class="link-accent text-sm">Full analytics →</a>
+        </div>
+        <% const gradeColors = { O:'#2ecc71', A:'#27ae60', B:'#3498db', C:'#f39c12', D:'#e67e22', F:'#e74c3c' }; %>
+        <% const totalGrades = gradeDist.reduce((a,g)=>a+g.count, 0) || 1; %>
+        <div class="grade-bars">
+            <% ['O','A','B','C','D','F'].forEach(g => { %>
+                <% const gd = gradeDist.find(x => x.grade === g); %>
+                <% const count = gd ? gd.count : 0; %>
+                <% const pct = ((count / totalGrades) * 100).toFixed(1); %>
+                <div class="grade-bar-row">
+                    <span class="grade-label" style="background:<%= gradeColors[g] %>"><%= g %></span>
+                    <div class="grade-track">
+                        <div class="grade-fill" style="width:<%= pct %>%;background:<%= gradeColors[g] %>"></div>
+                    </div>
+                    <span class="grade-count"><%= count %></span>
+                </div>
+            <% }) %>
+        </div>
+        <% if (!gradeDist.length) { %>
+            <p class="text-muted text-center" style="padding:2rem">No marks data yet</p>
+        <% } %>
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="quick-links-grid">
+    <a href="/marks/import" class="quick-link-card">
+        <span class="ql-icon">📥</span>
+        <span class="ql-label">Import CSV</span>
+    </a>
+    <a href="/subjects" class="quick-link-card">
+        <span class="ql-icon">📚</span>
+        <span class="ql-label">View Subjects</span>
+    </a>
+    <a href="/admin/analytics" class="quick-link-card">
+        <span class="ql-icon">📊</span>
+        <span class="ql-label">Analytics</span>
+    </a>
+    <a href="/admin/users" class="quick-link-card">
+        <span class="ql-icon">👥</span>
+        <span class="ql-label">All Users</span>
+    </a>
+</div>
+
+<%- include('../partials/footer') %>

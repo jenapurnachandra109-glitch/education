@@ -1,0 +1,464 @@
+<%- include('../partials/header') %>
+
+<%
+/* ── Grade colours matched to computeGrade() scale: O A B C D F ── */
+const gradeColors = {
+    'O' : '#15803d',
+    'A' : '#16a34a',
+    'B' : '#2563eb',
+    'C' : '#d97706',
+    'D' : '#ea580c',
+    'F' : '#dc2626',
+    '—' : '#94a3b8'
+};
+
+/* ── Build conic-gradient stops for the donut chart ── */
+const totalGradeCount = (gradeDistribution && gradeDistribution.length)
+    ? gradeDistribution.reduce((sum, e) => sum + e.count, 0) : 0;
+
+let gradePieStops = '#e5e7eb 0 100%';
+if (totalGradeCount > 0) {
+    let running = 0;
+    gradePieStops = gradeDistribution.map(entry => {
+        const start = running;
+        running += (entry.count / totalGradeCount) * 100;
+        return (gradeColors[entry.grade] || '#94a3b8')
+            + ' ' + start.toFixed(2) + '% ' + running.toFixed(2) + '%';
+    }).join(', ');
+}
+%>
+
+<!-- ── Page Header ─────────────────────────────────────────── -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">My Academic Performance</h1>
+        <p class="page-sub">
+            <%= student.branch_name %> (<%= student.branch_code %>) &middot; Current Semester <%= student.semester %>
+        </p>
+    </div>
+    <div class="page-actions">
+        <a href="/student/report" class="btn btn-primary">📄 Download Report</a>
+    </div>
+</div>
+
+<!-- ── Summary Stats ───────────────────────────────────────── -->
+<div class="stats-grid" style="margin-bottom:2rem">
+    <div class="stat-card stat-blue">
+        <div class="stat-icon">📋</div>
+        <div class="stat-body">
+            <div class="stat-value"><%= subjects.length %></div>
+            <div class="stat-label">All Branch Subjects</div>
+        </div>
+    </div>
+    <div class="stat-card stat-green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-body">
+            <div class="stat-value"><%= attemptedCount %></div>
+            <div class="stat-label">Results Available</div>
+        </div>
+    </div>
+    <div class="stat-card stat-orange">
+        <div class="stat-icon">📊</div>
+        <div class="stat-body">
+            <div class="stat-value"><%= overallPct !== null ? overallPct + '%' : '—' %></div>
+            <div class="stat-label">Overall Percentage</div>
+        </div>
+    </div>
+    <div class="stat-card stat-purple">
+        <div class="stat-icon">🏅</div>
+        <div class="stat-body">
+            <div class="stat-value grade-text-<%= overallGrade %>"><%= overallGrade %></div>
+            <div class="stat-label">Overall Grade</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Theory Subjects ─────────────────────────────────────── -->
+<% if (theory.length) { %>
+<div class="card" style="margin-bottom:2rem">
+    <div class="card-header">
+        <h3 class="card-title">📖 Theory Subjects</h3>
+        <span class="text-muted text-sm"><%= theory.length %> subjects</span>
+    </div>
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Sem</th>
+                    <th>Subject</th>
+                    <th>Code</th>
+                    <th>Marks</th>
+                    <th>Max</th>
+                    <th>Percentage</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% theory.forEach(s => { %>
+                <tr>
+                    <td><%= s.semester %></td>
+                    <td><strong><%= s.name %></strong></td>
+                    <td><span class="mono text-muted"><%= s.code %></span></td>
+                    <td>
+                        <% if (s.marks !== null && s.marks !== undefined) { %>
+                            <strong><%= s.marks %></strong>
+                        <% } else { %>
+                            <span class="text-muted">Not entered</span>
+                        <% } %>
+                    </td>
+                    <td class="text-muted"><%= s.max_marks %></td>
+                    <td>
+                        <% if (s.percentage !== null && s.percentage !== undefined) { %>
+                            <div class="pct-bar-wrap">
+                                <div class="pct-bar"
+                                     data-width="<%= s.percentage %>"
+                                     data-color="<%= s.percentage >= 75 ? '#27ae60' : s.percentage >= 50 ? '#f39c12' : '#e74c3c' %>">
+                                </div>
+                                <span class="pct-label"><%= s.percentage %>%</span>
+                            </div>
+                        <% } else { %>
+                            <span class="text-muted">—</span>
+                        <% } %>
+                    </td>
+                    <td><span class="grade-chip grade-<%= s.grade %>"><%= s.grade %></span></td>
+                </tr>
+            <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+<% } %>
+
+<!-- ── Lab Subjects ─────────────────────────────────────────── -->
+<% if (lab.length) { %>
+<div class="card" style="margin-bottom:2rem">
+    <div class="card-header">
+        <h3 class="card-title">🔬 Lab Subjects</h3>
+        <span class="text-muted text-sm"><%= lab.length %> subjects</span>
+    </div>
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Sem</th>
+                    <th>Subject</th>
+                    <th>Code</th>
+                    <th>Marks</th>
+                    <th>Max</th>
+                    <th>Percentage</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% lab.forEach(s => { %>
+                <tr>
+                    <td><%= s.semester %></td>
+                    <td><strong><%= s.name %></strong></td>
+                    <td><span class="mono text-muted"><%= s.code %></span></td>
+                    <td>
+                        <% if (s.marks !== null && s.marks !== undefined) { %>
+                            <strong><%= s.marks %></strong>
+                        <% } else { %>
+                            <span class="text-muted">Not entered</span>
+                        <% } %>
+                    </td>
+                    <td class="text-muted"><%= s.max_marks %></td>
+                    <td>
+                        <% if (s.percentage !== null && s.percentage !== undefined) { %>
+                            <div class="pct-bar-wrap">
+                                <div class="pct-bar"
+                                     data-width="<%= s.percentage %>"
+                                     data-color="<%= s.percentage >= 75 ? '#27ae60' : s.percentage >= 50 ? '#f39c12' : '#e74c3c' %>">
+                                </div>
+                                <span class="pct-label"><%= s.percentage %>%</span>
+                            </div>
+                        <% } else { %>
+                            <span class="text-muted">—</span>
+                        <% } %>
+                    </td>
+                    <td><span class="grade-chip grade-<%= s.grade %>"><%= s.grade %></span></td>
+                </tr>
+            <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+<% } %>
+
+<!-- ── Empty state ─────────────────────────────────────────── -->
+<% if (!subjects.length) { %>
+<div class="card" style="margin-bottom:2rem">
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>No subjects found for your branch.</p>
+        <p class="text-muted text-sm">Please contact your administrator.</p>
+    </div>
+</div>
+<% } %>
+
+<!-- ── Reports / Charts ────────────────────────────────────── -->
+<div class="card" style="margin-bottom:2rem">
+    <div class="card-header">
+        <h3 class="card-title">📈 Reports</h3>
+        <span class="text-muted text-sm">Charts across all available results</span>
+    </div>
+
+    <div class="reports-grid">
+
+        <!-- Semester Performance bars -->
+        <div class="report-panel">
+            <h4 class="report-title">Semester Performance</h4>
+            <% if (semesterSummary && semesterSummary.length) { %>
+                <div class="report-bars">
+                    <% semesterSummary.forEach(item => { %>
+                    <div class="report-bar-row">
+                        <div class="report-bar-label">Semester <%= item.semester %></div>
+                        <div class="report-bar-track">
+                            <div class="report-bar-fill"
+                                 data-width="<%= item.averagePercentage || 0 %>">
+                            </div>
+                        </div>
+                        <div class="report-bar-value">
+                            <% if (item.attemptedSubjects) { %>
+                                <%= item.averagePercentage %>%
+                            <% } else { %>
+                                No marks
+                            <% } %>
+                        </div>
+                    </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <p class="text-muted">No semester data available yet.</p>
+            <% } %>
+        </div>
+
+        <!-- Grade Distribution donut -->
+        <div class="report-panel">
+            <h4 class="report-title">Grade Distribution</h4>
+            <% if (gradeDistribution && gradeDistribution.length) { %>
+                <div class="report-donut-wrap">
+                    <!-- donut filled via JS to avoid EJS-in-CSS-attribute lint error -->
+                    <div class="report-donut" id="gradeDonut"></div>
+                    <div class="report-legend">
+                        <% gradeDistribution.forEach(entry => { %>
+                        <div class="report-legend-item">
+                            <span class="report-legend-swatch"
+                                  data-color="<%= gradeColors[entry.grade] || '#94a3b8' %>">
+                            </span>
+                            <span>
+                                <strong><%= entry.grade %></strong> — <%= entry.count %> subject(s)
+                            </span>
+                        </div>
+                        <% }) %>
+                    </div>
+                </div>
+            <% } else { %>
+                <p class="text-muted">No graded results available for the chart yet.</p>
+            <% } %>
+        </div>
+
+    </div><!-- /.reports-grid -->
+
+    <!-- Subject-wise bar chart (full width below the grid) -->
+    <div class="report-panel" style="margin:0 1.5rem 1.5rem">
+        <h4 class="report-title">Subject-wise Bar Chart</h4>
+        <% if (reportSubjects && reportSubjects.length) { %>
+            <div class="report-bars">
+                <% reportSubjects.forEach(subject => { %>
+                <div class="report-bar-row">
+                    <div class="report-bar-label">
+                        <%= subject.name || 'Unknown' %>
+                        <span class="text-muted">(Sem <%= subject.semester || '—' %>)</span>
+                    </div>
+                    <div class="report-bar-track">
+                        <div class="report-bar-fill report-bar-fill-alt"
+                             data-width="<%= subject.percentage || 0 %>">
+                        </div>
+                    </div>
+                    <div class="report-bar-value"><%= subject.percentage || 0 %>%</div>
+                </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <p class="text-muted">No marks entered yet, so the bar chart is empty.</p>
+        <% } %>
+    </div>
+
+</div><!-- /.card -->
+
+<!-- ── Recent Notifications ────────────────────────────────── -->
+<% if (notifications && notifications.length) { %>
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">🔔 Recent Notifications</h3>
+        <a href="/notifications" class="link-accent text-sm">View all →</a>
+    </div>
+    <div class="notif-list">
+        <% notifications.forEach(n => { %>
+        <div class="notif-item <%= n.is_read ? '' : 'notif-unread' %>">
+            <span class="notif-dot"></span>
+            <div class="notif-content">
+                <p class="notif-msg"><%= n.message %></p>
+                <span class="notif-time"><%= new Date(n.created_at * 1000).toLocaleString() %></span>
+            </div>
+        </div>
+        <% }) %>
+    </div>
+</div>
+<% } %>
+
+<!-- ── Page-scoped styles ──────────────────────────────────── -->
+<style>
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem 1.5rem 0;
+}
+
+.report-panel {
+    padding: 1.25rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.report-title {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.report-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.report-bar-row {
+    display: grid;
+    grid-template-columns: minmax(120px, 1.5fr) 2fr 60px;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.report-bar-label {
+    font-size: 0.85rem;
+    color: #334155;
+}
+
+.report-bar-value {
+    font-size: 0.82rem;
+    color: #64748b;
+    text-align: right;
+}
+
+.report-bar-track {
+    height: 10px;
+    background: #e5eefc;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.report-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    width: 0;
+    background: linear-gradient(90deg, #2563eb 0%, #38bdf8 100%);
+    transition: width 0.8s ease;
+}
+
+.report-bar-fill-alt {
+    background: linear-gradient(90deg, #7c3aed 0%, #22c55e 100%);
+}
+
+.report-donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.report-donut {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    background: #e5e7eb; /* overridden by JS */
+}
+
+.report-donut::after {
+    content: '';
+    position: absolute;
+    inset: 28px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px #e2e8f0;
+}
+
+.report-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.report-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.875rem;
+}
+
+.report-legend-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .report-bar-row    { grid-template-columns: 1fr; }
+    .reports-grid      { grid-template-columns: 1fr; }
+}
+</style>
+
+<!-- ── Scripts ─────────────────────────────────────────────── -->
+<script>
+/* Animate percentage bars in the subject tables */
+document.querySelectorAll('.pct-bar[data-width]').forEach(function(el) {
+    el.style.height       = '6px';
+    el.style.borderRadius = '999px';
+    el.style.width        = '0';
+    el.style.transition   = 'width 0.7s ease';
+    el.style.background   = el.dataset.color || '#27ae60';
+    setTimeout(function() {
+        el.style.width = (parseFloat(el.dataset.width) || 0) + '%';
+    }, 100);
+});
+
+/* Animate report chart bars */
+document.querySelectorAll('.report-bar-fill[data-width]').forEach(function(el) {
+    setTimeout(function() {
+        el.style.width = (parseFloat(el.dataset.width) || 0) + '%';
+    }, 200);
+});
+
+/* Colour the grade legend swatches */
+document.querySelectorAll('.report-legend-swatch[data-color]').forEach(function(el) {
+    el.style.background = el.dataset.color;
+});
+
+/* Draw grade donut via JS — avoids EJS-inside-CSS-attribute linting errors */
+(function() {
+    var el = document.getElementById('gradeDonut');
+    if (!el) return;
+    var stops = '<%- gradePieStops %>';
+    el.style.background = 'conic-gradient(' + stops + ')';
+}());
+</script>
+
+<%- include('../partials/footer') %>
