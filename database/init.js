@@ -1,3 +1,27 @@
+const db = require('./db');
+
+// ✅ CREATE USERS TABLE FIRST
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    email TEXT UNIQUE,
+    password_hash TEXT,
+    role_id INTEGER,
+    is_verified INTEGER
+  )
+`).run();
+
+// MARKS TABLE
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS marks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER,
+    subject TEXT,
+    marks INTEGER
+  )
+`).run();
+
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');

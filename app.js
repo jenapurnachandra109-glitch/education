@@ -1,5 +1,7 @@
 // app.js – EduTrack Express Application Entry Point
 
+require('./database/init');
+
 const express     = require('express');
 const session     = require('express-session');
 const flash       = require('connect-flash');
@@ -80,6 +82,7 @@ app.use((err, req, res, next) => {
 
 // ── Start Server ─────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-    console.log(`🎓 EduTrack running at http://localhost:${PORT}`);
+  console.log("Server running on port " + PORT);
 });

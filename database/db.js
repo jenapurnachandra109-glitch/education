@@ -6,4 +6,33 @@ const db = new Database(path.join(__dirname, 'edutrack.db'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+// ✅ CREATE ALL TABLES HERE
+
+// MARKS TABLE
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS marks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER,
+    subject TEXT,
+    marks INTEGER
+  )
+`).run();
+
+// STUDENTS TABLE (example – adjust if needed)
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS students (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    email TEXT
+  )
+`).run();
+
+// SUBJECTS TABLE (example)
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS subjects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT
+  )
+`).run();
+
 module.exports = db;
