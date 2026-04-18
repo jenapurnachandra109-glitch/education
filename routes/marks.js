@@ -478,7 +478,13 @@ router.post('/bulk/:subjectId', ...canManageMarks, (req, res) => {
                     throw new Error(`Marks must be between 0 and ${subject.max_marks}`);
                 }
 
-                upsertMark.run(studentId, subject.id, marks, req.session.user.id);
+                const userId = req.session?.user?.id;
+
+                if (!userId) {
+                throw new Error("User not authenticated");
+                }
+
+                upsertMark.run(studentId, subject.id, marks, userId);
             });
         });
 
