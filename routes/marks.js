@@ -6,6 +6,7 @@ const { parse } = require('csv-parse/sync');
 const PDFDocument = require('pdfkit');
 const bcrypt = require('bcryptjs');
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth } = require('../middleware/authMiddleware');
 
 const canManageMarks = [requireAuth, requireRole('admin', 'professor')];
 
@@ -328,6 +329,9 @@ router.post('/import', ...canManageMarks, async (req, res) => {
         const importSuccess = [];
         const updatedBy = req.session.user.id;
 
+        if (!subject) {
+            throw new Error("Subject not found");
+        }
         records.forEach((row, index) => {
             try {
                 const name = getField(row, ['name', 'student name']) || 'Unknown Student';
@@ -439,7 +443,7 @@ router.get('/bulk/:subjectId', ...canManageMarks, (req, res) => {
     });
 });
 
-router.post('/bulk/:subjectId', ...canManageMarks, (req, res) => {
+router.post('/bulk/:subjectId', requireAuth, ...canManageMarks, (req, res) => {
     try {
         const subject = getSubjectForBulk(req.params.subjectId);
 
