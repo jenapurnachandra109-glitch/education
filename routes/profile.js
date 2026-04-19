@@ -5,32 +5,62 @@ const path    = require('path');
 const router  = express.Router();
 const db      = require('../database/db');
 const { requireAuth } = require('../middleware/auth');
-
 router.get('/', requireAuth, (req, res) => {
-    const user = db.prepare(`
-        SELECT u.*, r.name AS role FROM users u
-        JOIN roles r ON r.id = u.role_id WHERE u.id = ?
-    `).get(req.session.user.id);
 
-    let extra = null;
-    if (user.role === 'student') {
-        extra = db.prepare(`
-            SELECT st.*, b.name AS branch_name, b.code
-            FROM students st JOIN branches b ON b.id = st.branch_id
-            WHERE st.user_id = ?
-        `).get(user.id);
-    } else if (user.role === 'professor') {
-        extra = db.prepare('SELECT * FROM professors WHERE user_id = ?').get(user.id);
+  const sessionUser = req.session?.user;
+
+  if (!sessionUser) {
+    return res.redirect('/login');
+  }
+
+  const user = db.prepare(`
+    SELECT u.*, r.name AS role 
+    FROM users u 
+    JOIN roles r ON r.id = u.role_id 
+    WHERE u.id = ?
+  `).get(sessionUser.id);
+
+  let extra = null;
+
+  if (user.role === 'student') {
+    extra = db.prepare(`
+      SELECT st.*, b.name AS branch_name, b.code
+      FROM students st
+      JOIN branches b ON b.id = st.branch_id
+      WHERE st.user_id = ?
+    `).get(user.id);
+
+  } else if (user.role === 'professor') {
+    extra = db.prepare(`
+      SELECT * FROM professors WHERE user_id = ?
+    `).get(user.id);
+  }
+
+  res.render('profile/index', {
+    title: 'My Profile',
+    user,
+    extra
+  });
+});
+router.post('/update', requireAuth, (req, res) => {
+
+    const sessionUser = req.session?.user;   // ✅ ADD THIS
+
+    if (!sessionUser) {                      // ✅ ADD THIS
+        return res.redirect('/login');
     }
 
-    res.render('profile/index', { title: 'My Profile', user, extra });
-});
-
-router.post('/update', requireAuth, (req, res) => {
     const { name, phone } = req.body;
-    db.prepare('UPDATE users SET name=?, phone=?, updated_at=strftime(\'%s\',\'now\') WHERE id=?')
-      .run(name, phone, req.session.user.id);
-    req.session.user.name = name;
+
+    db.prepare(`
+        UPDATE users 
+        SET name=?, phone=?, updated_at=strftime('%s','now') 
+        WHERE id=?
+    `).run(name, phone, sessionUser.id);     // ✅ CHANGE THIS
+
+    if (req.session?.user) {
+        req.session.user.name = name;
+    }
     req.flash('success', 'Profile updated.');
     res.redirect('/profile');
 });
@@ -46,20 +76,26 @@ router.post('/photo', requireAuth, (req, res) => {
         req.flash('error', 'Invalid file type. Use JPG, PNG or WebP.');
         return res.redirect('/profile');
     }
-    const filename = `user_${req.session.user.id}${ext}`;
+    const filename = `user_${sessionUser.id}${ext}`;
     const dest = path.join(__dirname, '../public/uploads', filename);
     file.mv(dest, (err) => {
         if (err) { req.flash('error', 'Upload failed.'); return res.redirect('/profile'); }
-        db.prepare('UPDATE users SET profile_photo=? WHERE id=?').run(filename, req.session.user.id);
-        req.session.user.photo = filename;
+        db.prepare('UPDATE users SET profile_photo=? WHERE id=?').run(filename, sessionUser.id);
+        req.session?.user.photo = filename;
         req.flash('success', 'Profile photo updated.');
         res.redirect('/profile');
     });
 });
 
 router.post('/change-password', requireAuth, (req, res) => {
+
+    const sessionUser = req.session?.user;   // ✅ ADD
+    if (!sessionUser) return res.redirect('/login');   // ✅ ADD
+
     const { current, password, confirm } = req.body;
-    const user = db.prepare('SELECT * FROM users WHERE id=?').get(req.session.user.id);
+
+    const user = db.prepare('SELECT * FROM users WHERE id=?')
+        .get(sessionUser.id);   // ✅ FIX
     if (!bcrypt.compareSync(current, user.password_hash)) {
         req.flash('error', 'Current password is incorrect.');
         return res.redirect('/profile');
