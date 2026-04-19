@@ -23,18 +23,25 @@ CREATE TABLE IF NOT EXISTS marks (
 
 // STUDENTS TABLE (example – adjust if needed)
 db.prepare(`
-  CREATE TABLE IF NOT EXISTS students (
+    CREATE TABLE IF NOT EXISTS students (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    email TEXT
+    user_id INTEGER,
+    roll_no TEXT,
+    branch_id INTEGER,
+    semester INTEGER
   )
 `).run();
 
 // SUBJECTS TABLE (example)
 db.prepare(`
-  CREATE TABLE IF NOT EXISTS subjects (
+    CREATE TABLE IF NOT EXISTS subjects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT
+    name TEXT,
+    code TEXT,
+    branch_id INTEGER,
+    semester INTEGER,
+    professor_id INTEGER,
+    max_marks INTEGER
   )
 `).run();
 
