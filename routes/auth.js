@@ -96,12 +96,12 @@ router.post('/register', redirectIfAuth, (req, res) => {
     const roleRow   = db.prepare('SELECT id FROM roles WHERE name = ?').get(role);
 
     const insertUser = db.prepare(`
-        INSERT INTO users (name, email, password_hash, role_id, role, verify_token, verify_token_exp)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (name, email, password_hash, role_id, verify_token, verify_token_exp)
+        VALUES (?, ?, ?, ?, ?, ?)
     `);
 
     const createUser = db.transaction(() => {
-        const info = insertUser.run(name, email, hash, roleRow.id, role, token, tokenExp);
+        const info = insertUser.run(name, email, hash, roleRow.id, token, tokenExp);
         const userId = info.lastInsertRowid;
 
         if (role === 'student') {
