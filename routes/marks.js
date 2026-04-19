@@ -327,7 +327,13 @@ router.post('/import', ...canManageMarks, async (req, res) => {
 
         const importErrors = [];
         const importSuccess = [];
-        const updatedBy = req.session?.user?.id;
+        const user = req.session?.user;
+
+        if (!user) {
+        throw new Error("User not authenticated");
+        }
+
+        const updatedBy = user.id;
 
         if (!subject) {
             throw new Error("Subject not found");
@@ -396,7 +402,13 @@ router.post('/import', ...canManageMarks, async (req, res) => {
                     WHERE id = ?
                 `).run(name, student.user_id);
 
-                const userId = req.session?.user?.id;
+                const user = req.session?.user;
+
+                if (!user) {
+                throw new Error("User not authenticated");
+                }
+
+                const userId = user.id;
 
                 if (!userId) {
                 throw new Error("User not authenticated");
@@ -425,7 +437,13 @@ router.post('/import', ...canManageMarks, async (req, res) => {
 router.get('/bulk/:subjectId', ...canManageMarks, (req, res) => {
     const subject = getSubjectForBulk(req.params.subjectId);
 
-    if (req.session.user.role === 'professor' && subject.professor_id !== req.session?.user?.id) {
+   const user = req.session?.user;
+
+    if (!user) {
+    return res.redirect('/login');
+    }
+
+    if (user.role === 'professor' && subject.professor_id !== user.id) {
         req.flash('error', 'Access denied');
         return res.redirect('/professor/dashboard');
     }
@@ -482,7 +500,13 @@ router.post('/bulk/:subjectId', requireAuth, ...canManageMarks, (req, res) => {
                     throw new Error(`Marks must be between 0 and ${subject.max_marks}`);
                 }
 
-                const userId = req.session?.user?.id;
+                const user = req.session?.user;
+
+                if (!user) {
+                throw new Error("User not authenticated");
+                }
+
+                const userId = user.id;
 
                 if (!userId) {
                 throw new Error("User not authenticated");
