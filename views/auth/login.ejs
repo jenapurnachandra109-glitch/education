@@ -42,17 +42,23 @@
             <% } %>
 
             <form method="POST" action="/login" class="auth-form">
+                <!-- Line ~45 -->
                 <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" name="email" class="form-input" placeholder="you@example.com" required autofocus>
+                    <label>Email Address</label>
+                    <input type="email" name="email" class="form-input">
                 </div>
+
+                <!-- (ROLL NUMBER REMOVED HERE) -->
+
+                <!-- Line ~56 -->
                 <div class="form-group">
-                    <label class="form-label">Password</label>
+                    <label>Password</label>
                     <div class="input-eye-wrap">
-                        <input type="password" name="password" id="pwdField" class="form-input" placeholder="••••••••" required>
+                        <input type="password" name="password" id="pwdField">
                         <button type="button" class="eye-btn" onclick="togglePwd()">👁</button>
                     </div>
                 </div>
+
                 <div class="form-row-between">
                     <label class="checkbox-label">
                         <input type="checkbox"> Remember me

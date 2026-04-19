@@ -37,6 +37,32 @@ function parseMarks(value) {
     return Number.isNaN(marks) ? 0 : marks;
 }
 
+function shouldUseFallbackMarks(rawMarks) {
+    if (rawMarks === null || rawMarks === undefined) {
+        return true;
+    }
+
+    if (typeof rawMarks === 'object') {
+        return true;
+    }
+
+    return normalizeText(rawMarks) === '';
+}
+
+function isGradeSheet(sheet) {
+    for (let rowNo = 1; rowNo <= Math.min(sheet.rowCount, 10); rowNo += 1) {
+        const row = sheet.getRow(rowNo);
+        for (let colNo = 1; colNo <= Math.min(row.cellCount || 8, 8); colNo += 1) {
+            const text = normalizeText(getCellValue(row.getCell(colNo).value));
+            if (/^grade$/i.test(text)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 function getCellValue(cellValue) {
     if (cellValue && typeof cellValue === 'object') {
         if (cellValue.result !== undefined && cellValue.result !== null) {
@@ -243,6 +269,10 @@ router.post('/import', ...canManageMarks, async (req, res) => {
             const aggregatedRecords = new Map();
 
             workbook.worksheets.forEach(sheet => {
+                if (isGradeSheet(sheet)) {
+                    return;
+                }
+
                 const detectedSubject = extractSubjectLabel(sheet);
                 const { marksCol, maxMarks, headerText } = extractMarksColumnInfo(sheet);
                 const inferredMaxMarks = maxMarks || inferMaxMarksFromSheet(sheet, marksCol, headerText);
@@ -270,7 +300,7 @@ router.post('/import', ...canManageMarks, async (req, res) => {
                     let rawMarks = getCellValue(row.getCell(marksCol).value);
                     let parsedMarks = parseMarks(rawMarks);
 
-                    if ((rawMarks === null || rawMarks === undefined || Number.isNaN(Number(rawMarks)) || normalizeText(rawMarks) === '' || parsedMarks === 0) && row.cellCount > marksCol) {
+                    if (shouldUseFallbackMarks(rawMarks) && row.cellCount > marksCol) {
                         for (let col = row.cellCount; col > marksCol; col -= 1) {
                             const fallbackValue = getCellValue(row.getCell(col).value);
                             const fallbackMarks = Number(normalizeText(fallbackValue));
@@ -335,15 +365,36 @@ router.post('/import', ...canManageMarks, async (req, res) => {
 
         const updatedBy = user.id;
 
-        if (!subject) {
-            throw new Error("Subject not found");
-        }
         records.forEach((row, index) => {
             try {
                 const name = getField(row, ['name', 'student name']) || 'Unknown Student';
-                const rollNo = normalizeText(getField(row, ['roll_no', 'rollnumber', 'regno', 'registration no']));
-                const subjectInput = normalizeText(getField(row, ['subject', 'subject_code', 'subject code', 'code']));
-                const rawMarks = getField(row, ['marks', 'score', 'obtained_marks', 'total']);
+                const rollNo = normalizeText(getField(row, [
+                    'roll_no',
+                    'roll number',
+                    'rollnumber',
+                    'regno',
+                    'reg no',
+                    'regd no',
+                    'regd. no',
+                    'registration no',
+                    'registration_no'
+                ]));
+                const subjectInput = normalizeText(getField(row, [
+                    'subject',
+                    'subject_code',
+                    'subject code',
+                    'subjectcode',
+                    'code'
+                ]));
+                const rawMarks = getField(row, [
+                    'marks',
+                    'mark',
+                    'score',
+                    'obtained_marks',
+                    'obtained marks',
+                    'total',
+                    'total marks'
+                ]);
 
                 if (!rollNo || !subjectInput) {
                     importErrors.push(`Row ${index + 1}: Missing roll number or subject`);
