@@ -327,7 +327,7 @@ router.post('/import', ...canManageMarks, async (req, res) => {
 
         const importErrors = [];
         const importSuccess = [];
-        const updatedBy = req.session.user.id;
+        const updatedBy = req.session?.user?.id;
 
         if (!subject) {
             throw new Error("Subject not found");
@@ -425,7 +425,7 @@ router.post('/import', ...canManageMarks, async (req, res) => {
 router.get('/bulk/:subjectId', ...canManageMarks, (req, res) => {
     const subject = getSubjectForBulk(req.params.subjectId);
 
-    if (req.session.user.role === 'professor' && subject.professor_id !== req.session.user.id) {
+    if (req.session.user.role === 'professor' && subject.professor_id !== req.session?.user?.id) {
         req.flash('error', 'Access denied');
         return res.redirect('/professor/dashboard');
     }
