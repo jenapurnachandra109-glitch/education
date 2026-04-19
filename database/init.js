@@ -12,6 +12,18 @@ const schema = fs.readFileSync(
 // ✅ Create all tables
 db.exec(schema);
 
+// ✅ Migration: ensure older databases get the professor_id column
+const subjectColumns = db.prepare(`PRAGMA table_info(subjects)`).all();
+const hasProfessorId = subjectColumns.some((column) => column.name === 'professor_id');
+
+if (!hasProfessorId) {
+  db.exec(`
+    ALTER TABLE subjects
+    ADD COLUMN professor_id INTEGER REFERENCES users(id)
+  `);
+  console.log('Migration applied: added subjects.professor_id');
+}
+
 console.log('Tables created successfully.');
 
 // ✅ Check admin exists

@@ -89,15 +89,16 @@ CREATE TABLE IF NOT EXISTS professors (
 -- Academic subjects scoped to branch + semester
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS subjects (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL,
-    code        TEXT    NOT NULL UNIQUE,
-    type        TEXT    NOT NULL CHECK (type IN ('THEORY','LAB')),
-    max_marks   INTEGER NOT NULL DEFAULT 100,
-    semester    INTEGER NOT NULL CHECK (semester BETWEEN 1 AND 8),
-    branch_id   INTEGER NOT NULL REFERENCES branches(id) ON DELETE CASCADE,
-    created_by  INTEGER REFERENCES users(id),   -- admin or professor who created it
-    created_at  INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    name         TEXT    NOT NULL,
+    code         TEXT    NOT NULL UNIQUE,
+    type         TEXT    NOT NULL CHECK (type IN ('THEORY','LAB')),
+    max_marks    INTEGER NOT NULL DEFAULT 100,
+    semester     INTEGER NOT NULL CHECK (semester BETWEEN 1 AND 8),
+    branch_id    INTEGER NOT NULL REFERENCES branches(id) ON DELETE CASCADE,
+    professor_id INTEGER REFERENCES users(id),
+    created_by   INTEGER REFERENCES users(id),   -- admin or professor who created it
+    created_at   INTEGER NOT NULL DEFAULT (strftime('%s','now'))
 );
 
 -- ------------------------------------------------------------
