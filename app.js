@@ -57,7 +57,9 @@ app.use((req, res, next) => {
 });
 
 // ✅ ADD HERE (BETWEEN LINE 46–47)
-
+app.get('/', (req, res) => {
+  res.redirect('/login');
+});
 
 
 // — Routes —
@@ -86,6 +88,7 @@ app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).render('error', { code: 500, message: 'Internal Server Error' });
 });
+
 
 // ── Start Server ─────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
