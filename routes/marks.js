@@ -6,7 +6,7 @@ const { parse } = require('csv-parse/sync');
 const PDFDocument = require('pdfkit');
 const bcrypt = require('bcryptjs');
 const { requireAuth, requireRole } = require('../middleware/auth');
-const { requireAuth } = require('../middleware/authMiddleware');
+
 
 const canManageMarks = [requireAuth, requireRole('admin', 'professor')];
 
