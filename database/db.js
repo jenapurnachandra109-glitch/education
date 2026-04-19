@@ -33,8 +33,9 @@ db.prepare(`
 `).run();
 
 // SUBJECTS TABLE (example)
+// subjects table
 db.prepare(`
-    CREATE TABLE IF NOT EXISTS subjects (
+  CREATE TABLE IF NOT EXISTS subjects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
     code TEXT,
@@ -45,4 +46,17 @@ db.prepare(`
   )
 `).run();
 
+// ✅ ADD THIS RIGHT HERE
+db.exec(`
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_marks_student_subject
+  ON marks(student_id, subject_id);
+`);
+
 module.exports = db;
+
+const check = db.prepare(`
+  SELECT sql FROM sqlite_master 
+  WHERE type='table' AND name='marks'
+`).get();
+
+console.log("MARKS TABLE:", check.sql);
