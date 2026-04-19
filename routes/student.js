@@ -105,8 +105,11 @@ function buildStudentAnalytics(subjects) {
 }
 
 router.get('/dashboard', [requireAuth, requireRole('student')], (req, res) => {
-    const student = getStudentProfile(req.session.user.id);
 
+    const sessionUser = req.session?.user;
+    if (!sessionUser) return res.redirect('/login');
+
+    const student = getStudentProfile(sessionUser.id);
     if (!student) {
         req.flash('error', 'Student profile not found.');
         return res.redirect('/logout');
@@ -117,7 +120,7 @@ router.get('/dashboard', [requireAuth, requireRole('student')], (req, res) => {
 
     const notifications = db.prepare(`
         SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 5
-    `).all(req.session.user.id);
+    `).all(sessionUser.id);
 
     res.render('student/dashboard', {
         title: 'My Performance',
@@ -138,7 +141,11 @@ router.get('/dashboard', [requireAuth, requireRole('student')], (req, res) => {
 });
 
 router.get('/report', [requireAuth, requireRole('student')], (req, res) => {
-    const student = getStudentProfile(req.session.user.id);
+
+    const sessionUser = req.session?.user;
+    if (!sessionUser) return res.redirect('/login');
+
+    const student = getStudentProfile(sessionUser.id);
 
     if (!student) {
         req.flash('error', 'Student profile not found.');
