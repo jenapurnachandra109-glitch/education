@@ -2,6 +2,7 @@
 
 require('./database/init');
 
+require('dotenv').config();
 const express     = require('express');
 const session     = require('express-session');
 const flash       = require('connect-flash');
@@ -30,10 +31,15 @@ app.use(fileUpload({
 
 // ── Session ──────────────────────────────────────────────────
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'edutrack-secret-2024',
+    secret: process.env.SESSION_SECRET || 'fallback-secret',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 8 }  // 8 hours
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 8, // 8 hours
+        httpOnly: true,
+        secure: false, // 👉 keep false for now (true only on HTTPS)
+        sameSite: 'lax'
+    }
 }));
 
 // ── Flash Messages ────────────────────────────────────────────
