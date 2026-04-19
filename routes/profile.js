@@ -81,7 +81,9 @@ router.post('/photo', requireAuth, (req, res) => {
     file.mv(dest, (err) => {
         if (err) { req.flash('error', 'Upload failed.'); return res.redirect('/profile'); }
         db.prepare('UPDATE users SET profile_photo=? WHERE id=?').run(filename, sessionUser.id);
-        req.session?.user.photo = filename;
+        if (req.session && req.session.user) {
+          req.session.user.photo = filename;
+        }
         req.flash('success', 'Profile photo updated.');
         res.redirect('/profile');
     });
