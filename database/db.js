@@ -11,12 +11,14 @@ db.pragma('foreign_keys = ON');
 
 // MARKS TABLE
 db.prepare(`
-  CREATE TABLE IF NOT EXISTS marks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    student_id INTEGER,
-    subject TEXT,
-    marks INTEGER
-  )
+CREATE TABLE IF NOT EXISTS marks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  student_id INTEGER,
+  subject_id INTEGER,
+  marks INTEGER,
+  updated_by INTEGER,
+  updated_at TEXT
+)
 `).run();
 
 // STUDENTS TABLE (example – adjust if needed)
