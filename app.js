@@ -30,18 +30,19 @@ app.use(fileUpload({
 }));
 
 // ── Session ──────────────────────────────────────────────────
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'fallback-secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 1000 * 60 * 60 * 8, // 8 hours
-        httpOnly: true,
-        secure: false, // 👉 keep false for now (true only on HTTPS)
-        sameSite: 'lax'
-    }
-}));
+app.set('trust proxy', 1);
 
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'fallback-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 8,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  }
+}));
 // ── Flash Messages ────────────────────────────────────────────
 app.use(flash());
 
