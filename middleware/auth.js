@@ -38,10 +38,3 @@ const redirectIfAuth = (req, res, next) => {
 };
 
 module.exports = { requireAuth, requireRole, redirectIfAuth };
-
-function requireAuth(req, res, next) {
-  if (!req.session?.user) {
-    return res.redirect('/login');
-  }
-  next();
-}
