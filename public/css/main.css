@@ -917,3 +917,53 @@ h1, h2, h3, h4 {
 .mt-24{
    margin-top:1.5rem;
 }
+
+/* Common button style */
+.btn-xs {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Give Import */
+.btn-import {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+.btn-import:hover {
+  background: #c7d2fe;
+}
+
+/* Verify */
+.btn-verify {
+  background: #22c55e;
+  color: white;
+}
+.btn-verify:hover {
+  background: #16a34a;
+}
+
+/* Unverify */
+.btn-unverify {
+  background: #70c5fd;
+  color: black;
+}
+.btn-unverify:hover {
+  background: #eab308;
+}
+
+/* Delete */
+.btn-delete {
+  background: #ef4444;
+  color: white;
+}
+.btn-delete:hover {
+  background: #dc2626;
+}
+.action-btns form {
+  display: inline-block;
+  margin-right: 5px;
+}

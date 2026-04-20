@@ -128,15 +128,23 @@ router.get('/analytics', isAdmin, (req, res) => {
 
 // ── Verify / Unverify user ────────────────────────────────────
 router.post('/users/:id/verify', isAdmin, (req, res) => {
-    const user = db.prepare('SELECT is_verified FROM users WHERE id = ?').get(req.params.id);
-    if (user) {
-        db.prepare('UPDATE users SET is_verified = ? WHERE id = ?').run(user.is_verified ? 0 : 1, req.params.id);
-    }
-    req.flash('success', 'User verification status updated.');
-    res.redirect('/admin/users');
+  const user = db.prepare(
+    'SELECT is_verified FROM users WHERE id = ?'
+  ).get(req.params.id);
+
+  if (user) {
+    db.prepare(`
+      UPDATE users 
+      SET is_verified = ? 
+      WHERE id = ?
+    `).run(user.is_verified ? 0 : 1, req.params.id);
+  }
+
+  req.flash('success', 'User verification updated');
+  res.redirect('/admin/users');
 });
 
-module.exports = router;
+
 
 router.post('/toggle-import/:userId', requireAuth, requireRole('admin'), (req, res) => {
     const userId = req.params.userId;
@@ -154,3 +162,5 @@ router.post('/toggle-import/:userId', requireAuth, requireRole('admin'), (req, r
     req.flash('success', 'Import permission updated');
     res.redirect('/admin/users');
 });
+
+module.exports = router;
