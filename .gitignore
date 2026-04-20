@@ -1,6 +1,13 @@
 node_modules/
-database/edutrack.db
 .env
+
+# Database files
+database/*.db
+database/*.db-shm
+database/*.db-wal
+database.sqlite
+
+# Uploads
 public/uploads/*.jpg
 public/uploads/*.png
 public/uploads/*.jpeg

@@ -5,7 +5,7 @@ const ExcelJS = require('exceljs');
 const { parse } = require('csv-parse/sync');
 const PDFDocument = require('pdfkit');
 const bcrypt = require('bcryptjs');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requireRole, requireImportPermission } = require('../middleware/auth');
 
 
 const canManageMarks = [requireAuth, requireRole('admin', 'professor')];
@@ -229,7 +229,7 @@ const createStudentFromImport = db.transaction(({ name, rollNo, subject, updated
     `).get(createdStudent.lastInsertRowid);
 });
 
-router.get('/import', ...canManageMarks, (req, res) => {
+router.get('/import', requireAuth, requireImportPermission, (req, res) => {
     res.render('marks/import', {
         title: 'Import Marks',
         subjects: getImportSubjects(),
@@ -238,7 +238,7 @@ router.get('/import', ...canManageMarks, (req, res) => {
     });
 });
 
-router.post('/import', ...canManageMarks, async (req, res) => {
+router.post('/import', requireAuth, requireImportPermission, async (req, res) => {
     try {
         if (!req.files || !req.files.file) {
             req.flash('error', 'No file uploaded');
@@ -485,7 +485,7 @@ router.post('/import', ...canManageMarks, async (req, res) => {
     }
 });
 
-router.get('/bulk/:subjectId', ...canManageMarks, (req, res) => {
+router.get('/bulk/:subjectId', requireAuth, requireImportPermission, (req, res) => {
     const subject = getSubjectForBulk(req.params.subjectId);
 
    const user = req.session?.user;
@@ -512,7 +512,7 @@ router.get('/bulk/:subjectId', ...canManageMarks, (req, res) => {
     });
 });
 
-router.post('/bulk/:subjectId', requireAuth, ...canManageMarks, (req, res) => {
+router.post('/bulk/:subjectId', requireAuth, requireImportPermission, (req, res) => {
     try {
         const subject = getSubjectForBulk(req.params.subjectId);
 

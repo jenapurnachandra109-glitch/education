@@ -46,16 +46,23 @@
                     <td class="text-sm text-muted"><%= new Date(u.created_at * 1000).toLocaleDateString() %></td>
                     <td>
                         <div class="action-btns">
-                            <form method="POST" action="/admin/users/<%= u.id %>/verify" style="display:inline">
-                                <button class="btn btn-xs btn-outline" title="Toggle verification">
-                                    <%= u.is_verified ? '🔒 Unverify' : '✅ Verify' %>
-                                </button>
-                            </form>
-                            <% if (u.id !== user.id) { %>
-                            <form method="POST" action="/admin/users/<%= u.id %>/delete" onsubmit="return confirm('Delete this user?')" style="display:inline">
-                                <button class="btn btn-xs btn-danger">🗑 Delete</button>
-                            </form>
+
+                            <!-- IMPORT TOGGLE BUTTON -->
+                            <% if (u.role === 'professor') { %>
+                                <form method="POST" action="/admin/toggle-import/<%= u.id %>" style="display:inline;">
+                                    <% if (u.can_import) { %>
+                                        <button class="btn btn-xs btn-danger">Remove Import</button>
+                                    <% } else { %>
+                                        <button class="btn btn-xs btn-success">Give Import</button>
+                                    <% } %>
+                                </form>
                             <% } %>
+
+                            <!-- EXISTING DELETE BUTTON -->
+                            <form method="POST" action="/admin/users/<%= u.id %>/delete" onsubmit="return confirm('Delete this user?')" style="display:inline;">
+                                <button class="btn btn-xs btn-danger">Delete</button>
+                            </form>
+
                         </div>
                     </td>
                 </tr>

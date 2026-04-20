@@ -1,5 +1,11 @@
 // routes/auth.js
 // Handles: register, login, logout, email verification, password reset
+const {
+    requireAuth,
+    requireRole,
+    requireImportPermission,
+    redirectIfAuth
+} = require('../middleware/auth');
 
 const express  = require('express');
 const bcrypt   = require('bcryptjs');
@@ -7,7 +13,8 @@ const { v4: uuidv4 } = require('uuid');
 const router   = express.Router();
 const db       = require('../database/db');
 const mailer   = require('../utils/mailer');
-const { redirectIfAuth, requireAuth } = require('../middleware/auth');
+
+
 
 // ── Helper: Unix now + offset ────────────────────────────────
 const nowPlus = (seconds) => Math.floor(Date.now() / 1000) + seconds;

@@ -1,11 +1,11 @@
 // middleware/auth.js
 // Authentication & role-based access control middleware
-
+const db = require('../database/db');
 /**
  * Ensure user is authenticated.
  * Redirects to login if session is absent.
  */
-const { requireAuth, requireImportPermission } = require('../middleware/auth');
+
 const requireAuth = (req, res, next) => {
     if (!req.session.user) {
         req.flash('error', 'Please log in to continue.');
@@ -33,13 +33,8 @@ const requireRole = (...roles) => (req, res, next) => {
 /**
  * Redirect already-authenticated users away from auth pages.
  */
-const redirectIfAuth = (req, res, next) => {
-    if (req.session.user) return res.redirect('/dashboard');
-    next();
-};
 
-module.exports = { requireAuth, requireRole, redirectIfAuth };
-const db = require('../database/db');
+
 
 function requireImportPermission(req, res, next) {
   if (!req.session.user || req.session.user.role !== 'professor') {
@@ -58,8 +53,16 @@ function requireImportPermission(req, res, next) {
 
   next();
 }
+
+const redirectIfAuth = (req, res, next) => {
+  if (req.session.user) {
+    return res.redirect('/dashboard');
+  }
+  next();
+};
 module.exports = {
   requireAuth,
   requireRole,
-  requireImportPermission
+  requireImportPermission,
+  redirectIfAuth
 };

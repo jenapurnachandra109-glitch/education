@@ -182,3 +182,4 @@ if (!adminExists) {
 }
 
 console.log('Database initialized successfully.');
+

@@ -137,3 +137,20 @@ router.post('/users/:id/verify', isAdmin, (req, res) => {
 });
 
 module.exports = router;
+
+router.post('/toggle-import/:userId', requireAuth, requireRole('admin'), (req, res) => {
+    const userId = req.params.userId;
+
+    // Remove import from all professors
+    db.prepare(`UPDATE professors SET can_import = 0`).run();
+
+    // Give import to selected professor
+    db.prepare(`
+        UPDATE professors 
+        SET can_import = 1 
+        WHERE user_id = ?
+    `).run(userId);
+
+    req.flash('success', 'Import permission updated');
+    res.redirect('/admin/users');
+});

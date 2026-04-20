@@ -77,12 +77,14 @@ CREATE TABLE IF NOT EXISTS students (
 -- Extends users for professor-specific attributes
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS professors (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id      INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-    employee_id  TEXT    NOT NULL UNIQUE,
-    department   TEXT,
-    designation  TEXT    DEFAULT 'Assistant Professor'
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL UNIQUE REFERENCES users(id),
+  employee_id TEXT NOT NULL UNIQUE,
+  department TEXT,
+  designation TEXT DEFAULT 'Assistant Professor',
+  can_import INTEGER DEFAULT 0
 );
+
 
 -- ------------------------------------------------------------
 -- Table: subjects
