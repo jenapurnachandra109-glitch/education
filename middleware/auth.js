@@ -5,6 +5,7 @@
  * Ensure user is authenticated.
  * Redirects to login if session is absent.
  */
+const { requireAuth, requireImportPermission } = require('../middleware/auth');
 const requireAuth = (req, res, next) => {
     if (!req.session.user) {
         req.flash('error', 'Please log in to continue.');
@@ -38,3 +39,27 @@ const redirectIfAuth = (req, res, next) => {
 };
 
 module.exports = { requireAuth, requireRole, redirectIfAuth };
+const db = require('../database/db');
+
+function requireImportPermission(req, res, next) {
+  if (!req.session.user || req.session.user.role !== 'professor') {
+    req.flash('error', 'Access denied.');
+    return res.redirect('/dashboard');
+  }
+
+  const prof = db.prepare(`
+    SELECT can_import FROM professors WHERE user_id = ?
+  `).get(req.session.user.id);
+
+  if (!prof || prof.can_import !== 1) {
+    req.flash('error', 'You are not allowed to import marks.');
+    return res.redirect('/dashboard');
+  }
+
+  next();
+}
+module.exports = {
+  requireAuth,
+  requireRole,
+  requireImportPermission
+};
