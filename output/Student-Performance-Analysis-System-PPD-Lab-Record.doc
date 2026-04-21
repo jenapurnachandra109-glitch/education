@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Student Performance Analysis System - PPD Lab Record</title>
+  <style>
+    body {
+      font-family: "Times New Roman", serif;
+      font-size: 12pt;
+      line-height: 1.45;
+      margin: 36pt 42pt;
+      color: #000;
+    }
+    .title {
+      font-size: 16pt;
+      font-weight: bold;
+      text-align: center;
+      text-transform: uppercase;
+      margin-bottom: 18pt;
+    }
+    .section {
+      font-size: 14pt;
+      font-weight: bold;
+      margin-top: 18pt;
+      margin-bottom: 8pt;
+    }
+    .subsection {
+      font-size: 12pt;
+      font-weight: bold;
+      margin-top: 10pt;
+      margin-bottom: 4pt;
+    }
+    p {
+      font-size: 12pt;
+      margin: 0 0 8pt 0;
+      text-align: justify;
+    }
+    ul, ol {
+      margin-top: 0;
+      margin-bottom: 8pt;
+    }
+    li {
+      margin-bottom: 4pt;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8pt 0 12pt 0;
+      font-size: 11pt;
+    }
+    th, td {
+      border: 1px solid #000;
+      padding: 6pt;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      font-weight: bold;
+      background: #f0f0f0;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+  <div class="title">STUDENT PERFORMANCE ANALYSIS SYSTEM</div>
+
+  <div class="section">1. AIM</div>
+  <p>
+    To design and develop a <b>Student Performance Analysis System</b> that automates the management,
+    monitoring, and analysis of student academic performance using a secure role-based web application
+    for <b>Admin</b>, <b>Professor</b>, and <b>Student</b> users.
+  </p>
+  <ul>
+    <li>To provide a centralized platform for storing and managing student academic records.</li>
+    <li>To help professors add, update, import, and analyze student marks efficiently.</li>
+    <li>To allow students to view marks, grades, notifications, and performance analytics transparently.</li>
+    <li>To enable the admin to manage users, assign roles, manage branches, and view overall reports.</li>
+    <li>To reduce manual effort and improve the accuracy, speed, and accessibility of academic record management.</li>
+  </ul>
+
+  <div class="section">2. PROBLEM ANALYSIS AND PROJECT PLAN</div>
+
+  <div class="subsection">2.1 Problem Analysis</div>
+  <p>
+    In many educational institutions, student performance records are still maintained manually through
+    registers, spreadsheets, or disconnected software tools. This approach often causes delayed updates,
+    calculation errors, duplicate work, poor transparency, and difficulty in generating academic reports.
+    Professors spend excessive time entering and revising marks, students do not always receive timely
+    information about their performance, and administrators struggle to obtain consolidated branch-wise
+    or institution-wide reports.
+  </p>
+  <p>
+    The proposed <b>Student Performance Analysis System</b> solves these issues by integrating authentication,
+    academic record management, mark entry, grade computation, analytics, notifications, and reporting
+    into one unified system. The project is based on the implemented web application stack of
+    <b>Node.js, Express.js, EJS, SQLite, session-based authentication, AJAX updates, PDF/Excel export,
+    notification handling, and profile management</b>.
+  </p>
+
+  <div class="subsection">2.2 Need for the Project</div>
+  <ul>
+    <li>To replace manual and semi-digital processes with a centralized web-based system.</li>
+    <li>To provide secure, role-based access to academic data.</li>
+    <li>To reduce paperwork and repetitive administrative effort.</li>
+    <li>To improve transparency for students regarding marks and grades.</li>
+    <li>To generate useful analytics such as grade distribution, branch performance, and top students.</li>
+    <li>To support academic reporting in downloadable formats.</li>
+  </ul>
+
+  <div class="subsection">2.3 Objectives of the Project</div>
+  <ul>
+    <li>To implement login and authentication for Admin, Professor, and Student users.</li>
+    <li>To provide role-based dashboards and restricted access based on permissions.</li>
+    <li>To allow professors to add, edit, import, and export marks.</li>
+    <li>To enable students to view marks, grades, and performance summaries.</li>
+    <li>To enable admins to manage users, branches, and view institutional analytics.</li>
+    <li>To maintain academic records in a secure relational database.</li>
+  </ul>
+
+  <div class="subsection">2.4 Project Plan</div>
+  <p>The project was planned and executed through the following phases:</p>
+  <ol>
+    <li><b>Requirement Gathering:</b> Identification of users, academic workflow, system scope, and expected outputs.</li>
+    <li><b>System Analysis:</b> Study of current limitations in manual result handling and definition of system modules.</li>
+    <li><b>System Design:</b> Preparation of SRS, UML diagrams, database schema, and interface forms.</li>
+    <li><b>Implementation:</b> Development of frontend, backend, utilities, and database components.</li>
+    <li><b>Testing:</b> Verification of login, role access, marks processing, analytics, notifications, and exports.</li>
+    <li><b>Documentation:</b> Preparation of the final project report and lab record document.</li>
+  </ol>
+
+  <div class="subsection">2.5 Feasibility Study</div>
+  <p><b>Technical Feasibility:</b> The project uses open-source and lightweight technologies such as Node.js, Express.js, EJS, SQLite, and supporting packages. These tools are suitable for academic projects and easy to deploy.</p>
+  <p><b>Economic Feasibility:</b> The system can be developed without licensed commercial software. The tools and runtime environment are freely available.</p>
+  <p><b>Operational Feasibility:</b> The role-based user interface is simple and practical. Users can easily understand their modules and perform required operations.</p>
+
+  <div class="section">3. PROBLEM STATEMENT</div>
+  <ol>
+    <li>Educational institutions require a reliable system to store, update, and analyze student academic performance records.</li>
+    <li>Manual management of marks and reports leads to errors, redundancy, delays, and difficulty in generating meaningful summaries.</li>
+    <li>Professors need a secure and easy-to-use mechanism for subject-wise mark entry and performance analysis.</li>
+    <li>Students need timely access to their marks, grades, performance statistics, and notifications.</li>
+    <li>Administrators need centralized control over users, branches, and institution-level reports.</li>
+    <li>A role-based web system is required to automate academic record management and support data-driven decision-making.</li>
+  </ol>
+
+  <div class="section">4. SOFTWARE REQUIREMENT SPECIFICATION (SRS)</div>
+
+  <div class="subsection">4.0 Introduction</div>
+  <p>
+    The <b>Student Performance Analysis System</b> is a web-based academic management application that
+    supports three major user roles: <b>Admin</b>, <b>Professor</b>, and <b>Student</b>. It automates
+    user authentication, subject management, marks entry, grade computation, student analytics, notifications,
+    profile management, and report generation.
+  </p>
+
+  <div class="subsection">4.0.1 Purpose</div>
+  <p>
+    The purpose of this SRS document is to formally define the functional and non-functional requirements
+    of the Student Performance Analysis System and provide a structured foundation for analysis, design,
+    implementation, testing, and maintenance.
+  </p>
+
+  <div class="subsection">4.0.2 Scope</div>
+  <ul>
+    <li>Secure login and authentication.</li>
+    <li>Role-based authorization and separate dashboards.</li>
+    <li>Admin management of users, roles, branches, and analytics.</li>
+    <li>Professor access to subject-wise student records and marks management.</li>
+    <li>Student access to dashboard, marks, grades, notifications, and profile details.</li>
+    <li>Bulk marks import through CSV and exports through PDF/Excel.</li>
+    <li>Academic analytics such as branch-wise performance, grade distribution, and top students.</li>
+  </ul>
+
+  <div class="subsection">4.0.3 Definitions</div>
+  <p><b>Admin:</b> The administrator who manages user accounts, roles, branches, and overall system reports.</p>
+  <p><b>Professor:</b> The academic staff member who handles subject-wise marks, views student performance, and updates records.</p>
+  <p><b>Student:</b> The end user who views personal academic performance, notifications, and profile details.</p>
+  <p><b>System:</b> The complete web application composed of frontend, backend, database, and utility modules.</p>
+
+  <div class="subsection">4.0.4 Technologies Used</div>
+  <p><b>Frontend:</b> EJS, HTML5, CSS3, JavaScript, AJAX</p>
+  <p><b>Backend:</b> Node.js, Express.js</p>
+  <p><b>Database:</b> SQLite using better-sqlite3</p>
+  <p><b>Supporting Packages:</b> bcryptjs, express-session, connect-flash, connect-sqlite3, uuid, nodemailer, exceljs, pdfkit, express-fileupload, csv-parse, dotenv</p>
+
+  <div class="subsection">4.0.5 Overview</div>
+  <p>
+    The system integrates authentication, role-based dashboards, subject management, marks entry,
+    notifications, profile management, and analytics into a single centralized application. It ensures that
+    each user interacts only with the functions appropriate to the assigned role.
+  </p>
+
+  <div class="subsection">4.1 Overall Description</div>
+
+  <div class="subsection">4.1.1 Product Perspective</div>
+  <p>
+    The Student Performance Analysis System is a standalone academic web application. It follows a layered
+    structure with EJS views for presentation, Express routes and middleware for application logic, and
+    SQLite as the persistent data storage mechanism.
+  </p>
+
+  <div class="subsection">4.1.2 System Functions</div>
+  <ul>
+    <li>User registration, login, email verification, and password reset.</li>
+    <li>Role-based dashboard display for Admin, Professor, and Student.</li>
+    <li>User and branch management by admin.</li>
+    <li>Subject creation and management.</li>
+    <li>Marks entry, update, validation, CSV import, PDF/Excel export.</li>
+    <li>Grade computation based on percentage.</li>
+    <li>Student performance dashboard and notifications.</li>
+    <li>Profile management with photo upload and password change.</li>
+  </ul>
+
+  <div class="subsection">4.1.3 User Characteristics</div>
+  <p><b>Admin:</b> Has authority to manage institutional-level records and reports.</p>
+  <p><b>Professor:</b> Needs subject-wise student data, marks handling, and analysis tools.</p>
+  <p><b>Student:</b> Requires a simple interface to view personal academic information.</p>
+
+  <div class="subsection">4.1.4 Constraints</div>
+  <ul>
+    <li>The system requires a browser and application runtime environment.</li>
+    <li>Correctness depends on authorized and valid data entry.</li>
+    <li>Session-based access requires proper login state.</li>
+    <li>SQLite is suitable for academic-scale deployment but not ideal for very large institutions.</li>
+  </ul>
+
+  <div class="subsection">4.1.5 Assumptions</div>
+  <ul>
+    <li>Each user has a unique account and a valid role assignment.</li>
+    <li>Students are mapped to valid branch and semester information.</li>
+    <li>Subjects are maintained correctly with valid codes and maximum marks.</li>
+    <li>Marks are entered only by authorized academic staff.</li>
+    <li>Users follow institutional rules for using the system.</li>
+  </ul>
+
+  <div class="section page-break">5. UML DIAGRAMS</div>
+
+  <div class="subsection">5.1 Use Case Diagram</div>
+  <p><b>Title:</b> Use Case Diagram for Student Performance Analysis System</p>
+  <p><b>Diagram Explanation:</b> The use case diagram represents the interaction between the actors and the major functionalities available in the system.</p>
+  <p><b>Actors / Components:</b> Admin, Professor, Student, System</p>
+  <p><b>Description:</b></p>
+  <ul>
+    <li><b>Admin</b> can log in, manage users, assign roles, manage branches, and view analytics.</li>
+    <li><b>Professor</b> can log in, open student lists, add/update marks, import CSV data, analyze performance, and export reports.</li>
+    <li><b>Student</b> can log in, view dashboard, check marks and grades, receive notifications, and update profile details.</li>
+    <li>The <b>System</b> validates credentials, stores academic data, computes grades, and generates reports.</li>
+  </ul>
+
+  <div class="subsection">5.2 Class Diagram</div>
+  <p><b>Title:</b> Class Diagram for Student Performance Analysis System</p>
+  <p><b>Diagram Explanation:</b> The class diagram shows the static structure of the system and relationships among major entities.</p>
+  <p><b>Actors / Components:</b> User, Role, Student, Professor, Branch, Subject, Mark, Notification, PasswordReset</p>
+  <p><b>Description:</b></p>
+  <ul>
+    <li><b>User</b> stores account information such as name, email, password hash, verification state, and role ID.</li>
+    <li><b>Role</b> defines categories such as admin, professor, and student.</li>
+    <li><b>Student</b> contains roll number, branch, semester, date of birth, and address.</li>
+    <li><b>Professor</b> contains employee ID, department, and designation.</li>
+    <li><b>Subject</b> stores subject code, name, type, semester, branch, and maximum marks.</li>
+    <li><b>Mark</b> links students and subjects and stores marks obtained.</li>
+    <li><b>Notification</b> stores user-specific alerts such as mark update messages.</li>
+  </ul>
+
+  <div class="subsection">5.3 Sequence Diagram</div>
+  <p><b>Title:</b> Sequence Diagram for Marks Entry and Performance View</p>
+  <p><b>Diagram Explanation:</b> The sequence diagram explains the order of messages between users, the interface, server, and database for marks entry and performance display.</p>
+  <p><b>Actors / Components:</b> Professor, Student, User Interface, Express Server, Database, Grade Utility, Notification Module</p>
+  <p><b>Description:</b></p>
+  <ul>
+    <li>Professor logs in and opens a subject student list.</li>
+    <li>Professor submits new or updated marks.</li>
+    <li>The server validates and stores the marks in the database.</li>
+    <li>Grade logic computes the performance grade.</li>
+    <li>The notification module generates an alert for the student.</li>
+    <li>Student later logs in and views updated marks, grades, and performance summaries.</li>
+  </ul>
+
+  <div class="subsection">5.4 Collaboration Diagram</div>
+  <p><b>Title:</b> Collaboration Diagram for Academic Record Management</p>
+  <p><b>Diagram Explanation:</b> The collaboration diagram focuses on how system objects interact to accomplish academic record management tasks.</p>
+  <p><b>Actors / Components:</b> Admin Object, Professor Object, Student Object, Auth Module, Marks Module, Analytics Module, Database</p>
+  <p><b>Description:</b></p>
+  <ul>
+    <li>Admin collaborates with user management and analytics modules.</li>
+    <li>Professor collaborates with subject and marks modules.</li>
+    <li>Student collaborates with dashboard and notification modules.</li>
+    <li>Analytics collaborates with marks and subject data to generate summaries.</li>
+  </ul>
+
+  <div class="subsection">5.5 State Chart Diagram</div>
+  <p><b>Title:</b> State Chart Diagram for Student Record Lifecycle</p>
+  <p><b>Diagram Explanation:</b> The state chart diagram describes the progression of a student academic record through various result-related states.</p>
+  <p><b>Actors / Components:</b> Student Record, Marks Process, Grade Status</p>
+  <p><b>Description:</b></p>
+  <ul>
+    <li>Account Created</li>
+    <li>Registered in System</li>
+    <li>Subjects Assigned</li>
+    <li>Marks Pending</li>
+    <li>Marks Entered</li>
+    <li>Marks Updated</li>
+    <li>Grade Computed</li>
+    <li>Analytics Generated</li>
+    <li>Result Viewed</li>
+  </ul>
+
+  <div class="subsection">5.6 Activity Diagram</div>
+  <p><b>Title:</b> Activity Diagram for System Workflow</p>
+  <p><b>Diagram Explanation:</b> The activity diagram represents the flow from login to role-based operations and output generation.</p>
+  <p><b>Actors / Components:</b> Login Process, Role Validation, Admin Activities, Professor Activities, Student Activities</p>
+  <p><b>Description:</b></p>
+  <ul>
+    <li>User opens login page and enters credentials.</li>
+    <li>The system validates the credentials and identifies the role.</li>
+    <li>Admin is redirected to management and analytics tasks.</li>
+    <li>Professor is redirected to subjects, students, and marks-related tasks.</li>
+    <li>Student is redirected to dashboard, marks, notifications, and profile tasks.</li>
+  </ul>
+
+  <div class="subsection">5.7 Component Diagram</div>
+  <p><b>Title:</b> Component Diagram for Student Performance Analysis System</p>
+  <p><b>Diagram Explanation:</b> The component diagram shows the major software components and their dependencies.</p>
+  <p><b>Actors / Components:</b> Client Browser, EJS Views, Express Routes, Auth Middleware, Utilities, SQLite Database, Mailer, Export Modules, File Upload Module</p>
+  <p><b>Description:</b></p>
+  <ul>
+    <li>The browser interacts with EJS-rendered views and forms.</li>
+    <li>Express routes process requests for authentication, admin, professor, student, marks, profile, notifications, and subjects.</li>
+    <li>Middleware protects routes and enforces user roles.</li>
+    <li>Utilities handle grades, notifications, and email sending.</li>
+    <li>Export modules generate PDF and Excel reports.</li>
+  </ul>
+
+  <div class="subsection">5.8 Deployment Diagram</div>
+  <p><b>Title:</b> Deployment Diagram for Web-Based Academic System</p>
+  <p><b>Diagram Explanation:</b> The deployment diagram shows the physical arrangement of the system in a runtime environment.</p>
+  <p><b>Actors / Components:</b> Client System, Node.js Application Server, SQLite Database File, SMTP Server</p>
+  <p><b>Description:</b></p>
+  <ul>
+    <li>Students, professors, and admins use a browser from client devices.</li>
+    <li>The Node.js application server runs the Express web application.</li>
+    <li>The SQLite database stores persistent academic and user records.</li>
+    <li>The SMTP server is used for verification and password reset mail delivery.</li>
+  </ul>
+
+  <div class="subsection">5.9 Package Diagram</div>
+  <p><b>Title:</b> Package Diagram for System Modules</p>
+  <p><b>Diagram Explanation:</b> The package diagram explains the logical organization of source files and templates in the project.</p>
+  <p><b>Actors / Components:</b> routes, views, middleware, database, utils, public</p>
+  <p><b>Description:</b></p>
+  <ul>
+    <li><b>routes</b>: auth.js, admin.js, professor.js, student.js, marks.js, subjects.js, profile.js, notifications.js</li>
+    <li><b>views</b>: EJS templates for auth, admin, professor, student, subjects, marks, notifications, profile, and partials</li>
+    <li><b>middleware</b>: authentication and authorization handling</li>
+    <li><b>database</b>: db.js, init.js, schema.sql</li>
+    <li><b>utils</b>: grades.js, mailer.js, notify.js</li>
+    <li><b>public</b>: CSS design system and uploads</li>
+  </ul>
+
+  <div class="section">6. USER INTERFACE (FORMS)</div>
+
+  <div class="subsection">6.1 Login Form (Admin / Professor / Student)</div>
+  <p>
+    The login form is used to authenticate all three roles in the system. It contains fields for email
+    and password along with a forgot password option. After successful authentication, the user is
+    redirected to the corresponding dashboard based on role.
+  </p>
+  <p><b>Major Fields:</b> Email, Password, Login Button, Forgot Password Link</p>
+
+  <div class="subsection">6.2 Add Marks Form</div>
+  <p>
+    The add marks form is used by professors to enter and update student marks for selected subjects.
+    It validates marks against the maximum allowed value for the subject and stores the data securely.
+  </p>
+  <p><b>Major Fields:</b> Subject, Student Name / Roll Number, Marks Obtained, Save / Update Button</p>
+
+  <div class="subsection">6.3 Student Dashboard</div>
+  <p>
+    The student dashboard provides a consolidated academic view. It displays subject-wise marks, grades,
+    summary statistics, performance insights, and notifications related to mark updates.
+  </p>
+
+  <div class="subsection">6.4 Admin Panel</div>
+  <p>
+    The admin panel provides centralized control over the system. It supports user management, branch
+    management, analytics display, recent user records, grade distribution view, and top-student reporting.
+  </p>
+
+  <div class="section">7. IMPLEMENTATION</div>
+
+  <div class="subsection">7.1 Frontend</div>
+  <p>
+    The frontend of the project is implemented using <b>EJS</b>, <b>HTML5</b>, <b>CSS3</b>, and
+    <b>JavaScript</b>. AJAX is used in parts of the marks workflow for inline updates and dynamic data
+    handling. The user interface includes login forms, dashboards, analytics pages, subject and marks forms,
+    notifications pages, and profile pages.
+  </p>
+
+  <div class="subsection">7.2 Backend</div>
+  <p>
+    The backend is implemented using <b>Node.js</b> and <b>Express.js</b>. The application logic is divided
+    into route modules such as <b>auth.js</b>, <b>admin.js</b>, <b>professor.js</b>, <b>student.js</b>,
+    <b>marks.js</b>, <b>subjects.js</b>, <b>notifications.js</b>, and <b>profile.js</b>.
+    Middleware is used for session-based authentication and role-based access control.
+  </p>
+
+  <div class="subsection">7.3 Database</div>
+  <p>
+    The database layer uses <b>SQLite</b> through <b>better-sqlite3</b>. Main tables include users,
+    roles, students, professors, branches, subjects, marks, notifications, and password reset tokens.
+    The schema provides normalized academic data storage and supports reliable reporting.
+  </p>
+
+  <div class="subsection">7.4 Database Tables Used</div>
+  <table>
+    <tr>
+      <th>Table Name</th>
+      <th>Purpose</th>
+    </tr>
+    <tr>
+      <td>users</td>
+      <td>Stores basic user account data such as name, email, password hash, verification status, and role.</td>
+    </tr>
+    <tr>
+      <td>roles</td>
+      <td>Stores predefined role names like admin, professor, and student.</td>
+    </tr>
+    <tr>
+      <td>students</td>
+      <td>Stores student-specific data like roll number, branch, semester, address, and DOB.</td>
+    </tr>
+    <tr>
+      <td>professors</td>
+      <td>Stores professor-specific data like employee ID, department, and designation.</td>
+    </tr>
+    <tr>
+      <td>branches</td>
+      <td>Stores branch and academic department information.</td>
+    </tr>
+    <tr>
+      <td>subjects</td>
+      <td>Stores subject code, name, type, semester, branch, and max marks.</td>
+    </tr>
+    <tr>
+      <td>marks</td>
+      <td>Stores marks obtained by students for individual subjects.</td>
+    </tr>
+    <tr>
+      <td>notifications</td>
+      <td>Stores user notifications such as mark update alerts.</td>
+    </tr>
+    <tr>
+      <td>password_resets</td>
+      <td>Stores reset tokens, expiry, and usage state for secure password recovery.</td>
+    </tr>
+  </table>
+
+  <div class="subsection">7.5 Key Features Implemented</div>
+  <ul>
+    <li>Password hashing with bcrypt.</li>
+    <li>Session-based authentication and role-based route protection.</li>
+    <li>Email verification and password recovery.</li>
+    <li>Subject management for theory and lab subjects.</li>
+    <li>Marks entry, update, CSV import, PDF export, and Excel export.</li>
+    <li>Performance analytics including branch performance, top students, and grade distribution.</li>
+    <li>In-app notifications for mark changes.</li>
+    <li>Profile editing with photo upload and password change.</li>
+  </ul>
+
+  <div class="section page-break">8. TESTING</div>
+
+  <div class="subsection">8.1 Testing Approach</div>
+  <p>
+    The system was tested using functional testing and validation testing. Each important feature was
+    checked with valid and invalid inputs to ensure correctness, security, and reliable output generation.
+  </p>
+
+  <div class="subsection">8.2 Test Cases</div>
+  <table>
+    <tr>
+      <th>Test Case ID</th>
+      <th>Module</th>
+      <th>Test Scenario</th>
+      <th>Expected Output</th>
+    </tr>
+    <tr>
+      <td>TC01</td>
+      <td>Login</td>
+      <td>Valid admin login</td>
+      <td>Admin dashboard opens successfully</td>
+    </tr>
+    <tr>
+      <td>TC02</td>
+      <td>Login</td>
+      <td>Valid professor login</td>
+      <td>Professor dashboard opens successfully</td>
+    </tr>
+    <tr>
+      <td>TC03</td>
+      <td>Login</td>
+      <td>Valid student login</td>
+      <td>Student dashboard opens successfully</td>
+    </tr>
+    <tr>
+      <td>TC04</td>
+      <td>Login</td>
+      <td>Invalid password</td>
+      <td>Error message displayed</td>
+    </tr>
+    <tr>
+      <td>TC05</td>
+      <td>User Management</td>
+      <td>Add new user</td>
+      <td>User created and stored successfully</td>
+    </tr>
+    <tr>
+      <td>TC06</td>
+      <td>Subject Management</td>
+      <td>Create subject with valid data</td>
+      <td>Subject saved successfully</td>
+    </tr>
+    <tr>
+      <td>TC07</td>
+      <td>Marks Entry</td>
+      <td>Add valid marks</td>
+      <td>Marks stored and success response shown</td>
+    </tr>
+    <tr>
+      <td>TC08</td>
+      <td>Marks Entry</td>
+      <td>Enter marks above max limit</td>
+      <td>Validation error shown</td>
+    </tr>
+    <tr>
+      <td>TC09</td>
+      <td>Student Dashboard</td>
+      <td>View marks and grades</td>
+      <td>Dashboard shows subject-wise performance</td>
+    </tr>
+    <tr>
+      <td>TC10</td>
+      <td>Analytics</td>
+      <td>View branch-wise performance</td>
+      <td>Analytics page displays summary reports</td>
+    </tr>
+    <tr>
+      <td>TC11</td>
+      <td>Notification</td>
+      <td>Update marks for a student</td>
+      <td>Student receives notification</td>
+    </tr>
+    <tr>
+      <td>TC12</td>
+      <td>Export</td>
+      <td>Generate PDF student report</td>
+      <td>PDF report generated successfully</td>
+    </tr>
+    <tr>
+      <td>TC13</td>
+      <td>Export</td>
+      <td>Generate Excel subject report</td>
+      <td>Excel file downloaded successfully</td>
+    </tr>
+    <tr>
+      <td>TC14</td>
+      <td>Password Reset</td>
+      <td>Request reset using registered email</td>
+      <td>Reset link generated and mailed</td>
+    </tr>
+    <tr>
+      <td>TC15</td>
+      <td>Profile</td>
+      <td>Update profile and upload photo</td>
+      <td>Profile data saved successfully</td>
+    </tr>
+  </table>
+
+  <div class="subsection">8.3 Expected Output</div>
+  <ul>
+    <li>Successful role-based login and redirection.</li>
+    <li>Correct user and branch management by admin.</li>
+    <li>Valid marks insertion and update by professor.</li>
+    <li>Accurate grade computation and dashboard summaries.</li>
+    <li>Timely student notifications after mark updates.</li>
+    <li>Successful PDF and Excel report generation.</li>
+    <li>Secure password reset and profile management workflows.</li>
+  </ul>
+
+  <div class="section">9. RESULT</div>
+  <p>
+    The <b>Student Performance Analysis System</b> was successfully designed and implemented as a web-based
+    academic management application. The system provides secure role-based access for <b>Admin</b>,
+    <b>Professor</b>, and <b>Student</b> users. It supports user management, branch handling, subject
+    management, marks entry, analytics, notifications, profile updates, and report generation.
+    The project reduces manual effort, improves accuracy in academic record handling, and provides useful
+    performance insights for students, faculty, and administration. Hence, the project satisfies the intended
+    objectives of a practical student performance monitoring system.
+  </p>
+
+  <div class="section">10. ADVANTAGES OF THE SYSTEM</div>
+  <ul>
+    <li>Reduces manual paperwork and repetitive effort.</li>
+    <li>Improves data accuracy and consistency.</li>
+    <li>Provides centralized access to academic records.</li>
+    <li>Improves transparency for students.</li>
+    <li>Supports report generation in PDF and Excel formats.</li>
+    <li>Provides analytics useful for academic planning.</li>
+    <li>Can be extended with additional institutional modules.</li>
+  </ul>
+
+  <div class="section">11. LIMITATIONS OF THE SYSTEM</div>
+  <ul>
+    <li>The system depends on proper and authorized data entry.</li>
+    <li>SQLite is best suited for small to medium academic deployments.</li>
+    <li>Continuous server and browser access are required in deployed environments.</li>
+    <li>Role mapping and branch data must be maintained accurately.</li>
+  </ul>
+
+  <div class="section">12. FUTURE ENHANCEMENTS</div>
+  <ul>
+    <li>Attendance-based performance tracking and integrated analytics.</li>
+    <li>Internal and external examination separation.</li>
+    <li>Graphical performance charts using advanced visualization tools.</li>
+    <li>Mobile application support.</li>
+    <li>Parent login and guardian notifications.</li>
+    <li>AI-based prediction for identifying at-risk students.</li>
+    <li>SMS and email academic alert enhancements.</li>
+  </ul>
+
+  <div class="section">13. CONCLUSION</div>
+  <p>
+    This project demonstrates the practical application of software engineering concepts, web development,
+    database design, and system modeling in a real academic domain. The Student Performance Analysis System
+    offers an effective, reliable, and scalable solution for digitizing student academic record management.
+    It can serve as a strong foundation for future academic management enhancements in educational institutions.
+  </p>
+</body>
+</html>
