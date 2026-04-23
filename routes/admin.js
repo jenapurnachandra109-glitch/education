@@ -11,37 +11,50 @@ const isAdmin = [requireAuth, requireRole('admin')];
 
 // ── Dashboard ────────────────────────────────────────────────
 router.get('/dashboard', isAdmin, (req, res) => {
-    const stats = {
-        students:   db.prepare("SELECT COUNT(*) AS c FROM students").get().c,
-        professors: db.prepare("SELECT COUNT(*) AS c FROM professors").get().c,
-        subjects:   db.prepare("SELECT COUNT(*) AS c FROM subjects").get().c,
-        branches:   db.prepare("SELECT COUNT(*) AS c FROM branches").get().c,
-    };
 
-    // Recent registrations
-    const recent = db.prepare(`
-        SELECT u.name, u.email, r.name AS role, u.created_at
-        FROM users u JOIN roles r ON r.id = u.role_id
-        ORDER BY u.created_at DESC LIMIT 8
-    `).all();
+  const stats = {
+    students: db.prepare("SELECT COUNT(*) AS c FROM students").get().c,
+    professors: db.prepare("SELECT COUNT(*) AS c FROM professors").get().c,
+    subjects: db.prepare("SELECT COUNT(*) AS c FROM subjects").get().c,
+    branches: db.prepare("SELECT COUNT(*) AS c FROM branches").get().c
+  };
 
-    // Grade distribution
-    const gradeDist = db.prepare(`
-        SELECT
-            CASE
-                WHEN (m.marks * 100.0 / s.max_marks) >= 90 THEN 'O'
-                WHEN (m.marks * 100.0 / s.max_marks) >= 80 THEN 'A'
-                WHEN (m.marks * 100.0 / s.max_marks) >= 70 THEN 'B'
-                WHEN (m.marks * 100.0 / s.max_marks) >= 60 THEN 'C'
-                WHEN (m.marks * 100.0 / s.max_marks) >= 50 THEN 'D'
-                ELSE 'F'
-            END AS grade,
-            COUNT(*) AS count
-        FROM marks m JOIN subjects s ON s.id = m.subject_id
-        GROUP BY grade
-    `).all();
+  const recent = db.prepare(`
+    SELECT u.name, u.email, r.name AS role, u.created_at
+    FROM users u
+    JOIN roles r ON r.id = u.role_id
+    ORDER BY u.created_at DESC
+    LIMIT 8
+  `).all();
 
-    res.render('admin/dashboard', { title: 'Admin Dashboard', stats, recent, gradeDist });
+  // (OPTIONAL) If you want CO data on dashboard
+  const coData = db.prepare(`
+    SELECT COUNT(*) as count FROM marks
+  `).get();
+
+  const gradeDist = db.prepare(`
+    SELECT 
+        CASE
+        WHEN (m.marks * 100.0 / s.max_marks) >= 90 THEN 'O'
+        WHEN (m.marks * 100.0 / s.max_marks) >= 80 THEN 'A'
+        WHEN (m.marks * 100.0 / s.max_marks) >= 70 THEN 'B'
+        WHEN (m.marks * 100.0 / s.max_marks) >= 60 THEN 'C'
+        WHEN (m.marks * 100.0 / s.max_marks) >= 50 THEN 'D'
+        ELSE 'F'
+        END AS grade,
+        COUNT(*) AS count
+    FROM marks m
+    JOIN subjects s ON s.id = m.subject_id
+    GROUP BY grade
+  `).all();
+  
+  res.render('admin/dashboard', {
+    title: 'Admin Dashboard',
+    stats,
+    recent,
+    gradeDist   // ✅ IMPORTANT
+  });
+
 });
 
 // ── All Users ────────────────────────────────────────────────
@@ -162,5 +175,6 @@ router.post('/toggle-import/:userId', requireAuth, requireRole('admin'), (req, r
     req.flash('success', 'Import permission updated');
     res.redirect('/admin/users');
 });
+
 
 module.exports = router;

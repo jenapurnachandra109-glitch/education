@@ -466,6 +466,31 @@ router.post('/import', requireAuth, requireImportPermission, async (req, res) =>
                 }
 
                 upsertMark.run(student.id, subject.id, marks, userId);
+
+                                // ===============================
+                // CO CALCULATION
+                // ===============================
+                const maxMarks = subject.max_marks || 100;
+                const percentage = (marks / maxMarks) * 100;
+
+                // Level logic
+                let level = 0;
+                if (percentage >= 70) level = 3;
+                else if (percentage >= 65) level = 2;
+                else if (percentage >= 60) level = 1;
+
+                // Get COs for subject
+                const cos = db.prepare(`
+                SELECT * FROM co WHERE subject_id = ?
+                `).all(subject.id);
+
+                // Store CO attainment
+                cos.forEach(co => {
+                db.prepare(`
+                    INSERT INTO co_attainment (student_id, subject_id, co_id, percentage, level)
+                    VALUES (?, ?, ?, ?, ?)
+                `).run(student.id, subject.id, co.id, percentage, level);
+                });
                 importSuccess.push(`${rollNo} - ${marks}`);
             } catch (err) {
                 importErrors.push(`Row ${index + 1}: ${err.message}`);
@@ -654,6 +679,129 @@ router.get('/export/pdf/:subjectId', ...canManageMarks, (req, res) => {
 
 router.get('/:subjectId', ...canManageMarks, (req, res) => {
     res.redirect(`/marks/bulk/${req.params.subjectId}`);
+});
+
+
+
+router.get('/co/:subjectId', requireAuth, (req, res) => {
+  const subjectId = req.params.subjectId;
+
+  // ✅ Get marks + max marks
+  const rows = db.prepare(`
+    SELECT u.name, s.roll_no, m.marks, sub.max_marks
+    FROM marks m
+    JOIN students s ON s.id = m.student_id
+    JOIN users u ON u.id = s.user_id
+    JOIN subjects sub ON sub.id = m.subject_id
+    WHERE m.subject_id = ?
+  `).all(subjectId);
+
+  // ✅ Convert into CO analysis
+  const data = rows.map(r => {
+    const percentage = (r.marks / r.max_marks) * 100;
+
+    let level = "Low";
+    if (percentage >= 80) level = "High";
+    else if (percentage >= 50) level = "Medium";
+
+    return {
+      name: r.name,
+      roll_no: r.roll_no,
+      co: "CO1",
+      percentage: percentage,
+      level: level
+    };
+  });
+
+  // ✅ Send to frontend
+  res.render('marks/co_analysis', { data });
+});
+
+router.get('/po/:subjectId', requireAuth, (req, res) => {
+  const subjectId = req.params.subjectId;
+
+  const rows = db.prepare(`
+    SELECT u.name, s.roll_no, m.marks, sub.max_marks
+    FROM marks m
+    JOIN students s ON s.id = m.student_id
+    JOIN users u ON u.id = s.user_id
+    JOIN subjects sub ON sub.id = m.subject_id
+    WHERE m.subject_id = ?
+  `).all(subjectId);
+
+  const data = rows.map(r => {
+    const percentage = (r.marks / r.max_marks) * 100;
+
+    let level = "Low";
+    if (percentage >= 80) level = "High";
+    else if (percentage >= 50) level = "Medium";
+
+    return {
+      name: r.name,
+      roll_no: r.roll_no,
+      po: "PO1",
+      percentage: percentage,
+      level: level
+    };
+  });
+
+  res.render('marks/po_analysis', { data });
+});
+
+
+router.get('/report/:subjectId', requireAuth, (req, res) => {
+  const subjectId = req.params.subjectId;
+
+  // Get all students marks for this subject
+  const marks = db.prepare(`
+    SELECT 
+      m.marks, 
+      s.max_marks, 
+      u.name, 
+      st.roll_no
+    FROM marks m
+    JOIN subjects s ON s.id = m.subject_id
+    JOIN students st ON st.id = m.student_id
+    JOIN users u ON u.id = st.user_id
+    WHERE m.subject_id = ?
+  `).all(subjectId);
+
+  // CO Calculation
+  let high = 0, medium = 0, low = 0;
+
+  marks.forEach(m => {
+    const percentage = (m.marks / m.max_marks) * 100;
+
+    if (percentage >= 80) high++;
+    else if (percentage >= 50) medium++;
+    else low++;
+  });
+
+  // PO Calculation (average)
+  let total = 0;
+  marks.forEach(m => {
+    total += (m.marks / m.max_marks) * 100;
+  });
+
+    let poHigh = 0, poMedium = 0, poLow = 0;
+
+    marks.forEach(m => {
+        const percentage = (m.marks / m.max_marks) * 100;
+
+        if (percentage >= 80) poHigh++;
+        else if (percentage >= 50) poMedium++;
+        else poLow++;
+    });
+
+  res.render('marks/report', {
+    data: marks,
+    high,
+    medium,
+    low,
+    poHigh,
+    poMedium,
+    poLow
+    });
 });
 
 module.exports = router;

@@ -19,44 +19,67 @@ const professorOptionsQuery = `
 
 // List all subjects
 router.get('/', requireAuth, (req, res) => {
-    const { branch_id, semester, type } = req.query;
-    let query = `
-        SELECT s.*, b.name AS branch_name, b.code AS branch_code,
-               u.name AS creator_name,
-               prof.name AS professor_name
-        FROM subjects s
-        JOIN branches b ON b.id = s.branch_id
-        LEFT JOIN users u ON u.id = s.created_by
-        LEFT JOIN users prof ON prof.id = s.professor_id
-        WHERE 1=1
-    `;
-    const params = [];
-    if (req.session.user.role === 'professor') {
-        query += ' AND s.professor_id = ?';
-        params.push(req.session.user.id);
-    } else if (req.session.user.role === 'student') {
-        query += ' AND s.branch_id = ?';
-        const student = db.prepare(`
-            SELECT branch_id
-            FROM students
-            WHERE user_id = ?
-        `).get(req.session.user.id);
+    try {
+        const { branch_id, semester, type } = req.query;
+        let query = `
+            SELECT s.*, b.name AS branch_name, b.code AS branch_code,
+                   u.name AS creator_name,
+                   prof.name AS professor_name
+            FROM subjects s
+            JOIN branches b ON b.id = s.branch_id
+            LEFT JOIN users u ON u.id = s.created_by
+            LEFT JOIN users prof ON prof.id = s.professor_id
+            WHERE 1=1
+        `;
+        const params = [];
 
-        if (!student) {
-            req.flash('error', 'Student profile not found.');
-            return res.redirect('/student/dashboard');
+        if (req.session.user.role === 'professor') {
+            query += ' AND s.professor_id = ?';
+            params.push(req.session.user.id);
+        } else if (req.session.user.role === 'student') {
+            query += ' AND s.branch_id = ?';
+            const student = db.prepare(`
+                SELECT branch_id
+                FROM students
+                WHERE user_id = ?
+            `).get(req.session.user.id);
+
+            if (!student) {
+                req.flash('error', 'Student profile not found.');
+                return res.redirect('/student/dashboard');
+            }
+
+            params.push(student.branch_id);
         }
 
-        params.push(student.branch_id);
-    }
-    if (branch_id) { query += ' AND s.branch_id = ?'; params.push(branch_id); }
-    if (semester)  { query += ' AND s.semester = ?';  params.push(semester); }
-    if (type)      { query += ' AND s.type = ?';      params.push(type); }
-    query += ' ORDER BY b.name, s.semester, s.type, s.name';
+        if (branch_id) { query += ' AND s.branch_id = ?'; params.push(branch_id); }
+        if (semester)  { query += ' AND s.semester = ?';  params.push(semester); }
+        if (type)      { query += ' AND s.type = ?';      params.push(type); }
+        query += ' ORDER BY b.name, s.semester, s.type, s.name';
 
-    const subjects = db.prepare(query).all(...params);
-    const branches = db.prepare('SELECT * FROM branches ORDER BY name').all();
-    res.render('subjects/index', { title: 'Subjects', subjects, branches, filters: req.query });
+        const subjects = db.prepare(query).all(...params);
+        const branches = db.prepare('SELECT * FROM branches ORDER BY name').all();
+
+        res.render('subjects/index', {
+            title: 'Subjects',
+            subjects,
+            branches,
+            filters: req.query
+        });
+    } catch (error) {
+        console.error('Subject list error:', error);
+        req.flash('error', 'Failed to load subjects.');
+
+        if (req.session.user.role === 'admin') {
+            return res.redirect('/admin/dashboard');
+        }
+
+        if (req.session.user.role === 'professor') {
+            return res.redirect('/professor/dashboard');
+        }
+
+        return res.redirect('/student/dashboard');
+    }
 });
 
 // Create subject form

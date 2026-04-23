@@ -63,6 +63,7 @@
                             <%= s.type %>
                         </span>
                     </td>
+
                     <td><%= s.branch_code %></td>
                     <td><%= s.semester %></td>
                     <td><%= s.max_marks %></td>
@@ -71,6 +72,7 @@
                     <% if (user.role !== 'student') { %>
                     <td>
                         <a href="/marks/bulk/<%= s.id %>" class="btn btn-xs btn-primary">Marks</a>
+                        <a href="/marks/report/<%= s.id %>" class="btn btn-xs btn-outline">Report</a>
                     </td>
                     <% } %>
                     <% if (user.role === 'admin') { %>

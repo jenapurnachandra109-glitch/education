@@ -1,0 +1,26 @@
+<h2>PO Analysis</h2>
+
+<table border="1">
+  <tr>
+    <th>Name</th>
+    <th>Roll No</th>
+    <th>PO</th>
+    <th>Percentage</th>
+    <th>Level</th>
+  </tr>
+
+  <% if (data && data.length) { %>
+    <% data.forEach(d => { %>
+      <tr>
+        <td><%= d.name %></td>
+        <td><%= d.roll_no %></td>
+        <td><%= d.po %></td>
+        <td><%= d.percentage.toFixed(2) %>%</td>
+        <td><%= d.level %></td>
+      </tr>
+    <% }) %>
+  <% } else { %>
+    <tr><td colspan="5">No data available</td></tr>
+  <% } %>
+
+</table>

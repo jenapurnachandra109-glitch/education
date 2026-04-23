@@ -76,6 +76,7 @@ app.use('/student',     require('./routes/student'));
 app.use('/profile',     require('./routes/profile'));
 app.use('/subjects',    require('./routes/subjects'));
 app.use('/marks',       require('./routes/marks'));
+app.use('/',            require('./routes/copo'));
 app.use('/notifications', require('./routes/notifications'));
 
 // ── 404 Handler ───────────────────────────────────────────────

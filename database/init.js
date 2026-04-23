@@ -183,3 +183,12 @@ if (!adminExists) {
 
 console.log('Database initialized successfully.');
 
+db.exec(`
+INSERT INTO co_po (co_id, po, weight) VALUES
+(1, 'PO1', 3),
+(1, 'PO2', 2),
+(2, 'PO1', 2),
+(2, 'PO2', 3),
+(3, 'PO1', 1),
+(3, 'PO2', 2);
+`);

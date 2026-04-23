@@ -1,0 +1,51 @@
+<%- include('../partials/header') %>
+
+<h2>Subject Report</h2>
+
+<h3>CO Distribution</h3>
+<canvas id="coPie" width="400" height="200"></canvas>
+
+<h3>PO Performance</h3>
+<canvas id="poPie" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const high = <%= high || 0 %>;
+  const medium = <%= medium || 0 %>;
+  const low = <%= low || 0 %>;
+
+  const poHigh = <%= poHigh || 0 %>;
+  const poMedium = <%= poMedium || 0 %>;
+  const poLow = <%= poLow || 0 %>;
+
+// CO Chart
+  new Chart(document.getElementById('coPie'), {
+    type: 'pie',
+    data: {
+      labels: ['High', 'Medium', 'Low'],
+      datasets: [{
+        data: [high, medium, low],
+        backgroundColor: ['green', 'orange', 'red']
+      }]
+    }
+  });
+
+// PO Chart
+  new Chart(document.getElementById('poPie'), {
+    type: 'pie',
+    data: {
+      labels: ['High', 'Medium', 'Low'],
+      datasets: [{
+        data: [poHigh, poMedium, poLow],
+        backgroundColor: ['green', 'orange', 'red']
+      }]
+    }
+  });
+
+});
+</script>
+
+<%- include('../partials/footer') %>

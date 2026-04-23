@@ -1,0 +1,98 @@
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<h2>CO Analysis</h2>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<h3>CO Performance Chart</h3>
+<canvas id="barChart"></canvas>
+
+<h3>CO Level Distribution</h3>
+<canvas id="pieChart"></canvas>
+
+<table border="1">
+  <tr>
+    <th>Name</th>
+    <th>Roll No</th>
+    <th>CO</th>
+    <th>Percentage</th>
+    <th>Level</th>
+  </tr>
+
+  <% if (data && data.length) { %>
+    <% data.forEach(d => { %>
+      <tr>
+        <td><%= d.name %></td>
+        <td><%= d.roll_no %></td>
+        <td><%= d.co %></td>
+        <td><%= d.percentage.toFixed(2) %>%</td>
+        <td><%= d.level %></td>
+      </tr>
+    <% }) %>
+  <% } else { %>
+    <tr><td colspan="5">No data available</td></tr>
+  <% } %>
+
+<canvas id="barChart"></canvas>
+<canvas id="pieChart"></canvas>
+
+</table>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const data = <%- JSON.stringify(data || []) %>;
+
+  const names = data.map(d => d.name);
+  const percentages = data.map(d => d.percentage);
+
+  const high = data.filter(d => d.level === "High").length;
+  const medium = data.filter(d => d.level === "Medium").length;
+  const low = data.filter(d => d.level === "Low").length;
+
+  // BAR CHART
+  const barCtx = document.getElementById('barChart').getContext('2d');
+
+  new Chart(barCtx, {
+    type: 'bar',
+    data: {
+      labels: names,
+      datasets: [{
+        label: 'CO %',
+        data: percentages,
+        backgroundColor: 'rgba(54, 162, 235, 0.6)'
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100
+        }
+      }
+    }
+  });
+
+  // PIE CHART
+  const pieCtx = document.getElementById('pieChart').getContext('2d');
+
+  new Chart(pieCtx, {
+    type: 'pie',
+    data: {
+      labels: ['High', 'Medium', 'Low'],
+      datasets: [{
+        data: [high, medium, low],
+        backgroundColor: [
+          'green',
+          'orange',
+          'red'
+        ]
+      }]
+    }
+  });
+
+});
+</script>

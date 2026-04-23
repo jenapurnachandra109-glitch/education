@@ -1,0 +1,315 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">CO/PO Reports</h1>
+        <p class="page-sub">Search a student by name or ID to view CO and PO attainment.</p>
+    </div>
+</div>
+
+<div class="card copo-search-card">
+    <div class="card-header">
+        <h3 class="card-title">Student Search</h3>
+    </div>
+    <form id="copoSearchForm" class="copo-search-form">
+        <input
+            id="studentSearchInput"
+            type="text"
+            class="form-input"
+            placeholder="Enter student name or ID"
+            autocomplete="off"
+        >
+        <button type="submit" class="btn btn-primary">Search Report</button>
+    </form>
+    <p class="form-hint copo-search-hint">Admin can search all students. Professors can search students from their assigned subjects.</p>
+</div>
+
+<div id="copoFeedback" class="flash flash-info" style="display:none"></div>
+
+<section id="copoReportSection" class="copo-report-section" style="display:none">
+    <div class="stats-grid copo-stats-grid">
+        <div class="stat-card stat-blue">
+            <div class="stat-body">
+                <div class="stat-label">Student Name</div>
+                <div class="stat-value stat-value-sm" id="studentNameValue">-</div>
+            </div>
+        </div>
+        <div class="stat-card stat-green">
+            <div class="stat-body">
+                <div class="stat-label">Student ID</div>
+                <div class="stat-value stat-value-sm" id="studentIdValue">-</div>
+            </div>
+        </div>
+        <div class="stat-card stat-orange">
+            <div class="stat-body">
+                <div class="stat-label">Branch</div>
+                <div class="stat-value stat-value-sm" id="studentBranchValue">-</div>
+            </div>
+        </div>
+        <div class="stat-card stat-purple">
+            <div class="stat-body">
+                <div class="stat-label">Semester</div>
+                <div class="stat-value stat-value-sm" id="studentSemesterValue">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="two-col-layout copo-chart-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">CO Attainment</h3>
+            </div>
+            <div class="copo-chart-wrap">
+                <canvas id="coChart"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">PO Attainment</h3>
+            </div>
+            <div class="copo-chart-wrap">
+                <canvas id="poChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Student CO/PO Details</h3>
+        </div>
+        <div id="copoDetails" class="copo-details"></div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const searchForm = document.getElementById('copoSearchForm');
+    const searchInput = document.getElementById('studentSearchInput');
+    const feedbackBox = document.getElementById('copoFeedback');
+    const reportSection = document.getElementById('copoReportSection');
+    const detailsContainer = document.getElementById('copoDetails');
+
+    const studentNameValue = document.getElementById('studentNameValue');
+    const studentIdValue = document.getElementById('studentIdValue');
+    const studentBranchValue = document.getElementById('studentBranchValue');
+    const studentSemesterValue = document.getElementById('studentSemesterValue');
+
+    const colorPalette = [
+        '#0ea5e9',
+        '#22c55e',
+        '#f59e0b',
+        '#8b5cf6',
+        '#ef4444',
+        '#14b8a6',
+        '#ec4899',
+        '#6366f1',
+        '#f97316',
+        '#84cc16'
+    ];
+
+    let coChart;
+    let poChart;
+
+    function showFeedback(message, type) {
+        feedbackBox.className = `flash flash-${type}`;
+        feedbackBox.textContent = message;
+        feedbackBox.style.display = 'block';
+    }
+
+    function clearFeedback() {
+        feedbackBox.style.display = 'none';
+        feedbackBox.textContent = '';
+    }
+
+    function gradeBadgeClass(grade) {
+        return `grade-${grade || 'na'}`;
+    }
+
+    function renderStudentSummary(student) {
+        studentNameValue.textContent = student.name || '-';
+        studentIdValue.textContent = student.rollNo || student.id || '-';
+        studentBranchValue.textContent = student.branchCode ? `${student.branch} (${student.branchCode})` : (student.branch || '-');
+        studentSemesterValue.textContent = student.semester || '-';
+    }
+
+    function renderCharts(charts) {
+        const coCtx = document.getElementById('coChart');
+        const poCtx = document.getElementById('poChart');
+
+        if (coChart) coChart.destroy();
+        if (poChart) poChart.destroy();
+
+        const coLabels = charts.co.map((item) => item.label);
+        const coValues = charts.co.map((item) => item.value);
+        const poLabels = charts.po.map((item) => item.label);
+        const poValues = charts.po.map((item) => item.value);
+
+        coChart = new Chart(coCtx, {
+            type: 'pie',
+            data: {
+                labels: coLabels,
+                datasets: [{
+                    data: coValues,
+                    backgroundColor: coLabels.map((_, index) => colorPalette[index % colorPalette.length]),
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            label(context) {
+                                const point = charts.co[context.dataIndex];
+                                return `${point.label}: ${point.value}% | Grade ${point.grade} | Result ${point.result}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        poChart = new Chart(poCtx, {
+            type: 'bar',
+            data: {
+                labels: poLabels,
+                datasets: [{
+                    label: 'PO Attainment %',
+                    data: poValues,
+                    backgroundColor: poLabels.map((_, index) => colorPalette[index % colorPalette.length]),
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            label(context) {
+                                const point = charts.po[context.dataIndex];
+                                return `${point.label}: ${point.value}% | Grade ${point.grade} | Result ${point.result}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderDetails(subjects) {
+        detailsContainer.innerHTML = subjects.map((subject) => {
+            const coRows = subject.coValues.map((co) => `
+                <tr>
+                    <td><strong>${co.name}</strong></td>
+                    <td>${co.percentage}%</td>
+                    <td><span class="badge badge-professor">Level ${co.level}</span></td>
+                    <td><span class="grade-chip ${gradeBadgeClass(co.grade)}">${co.grade}</span></td>
+                    <td>${co.poMappings.length ? co.poMappings.map((mapping) => `${mapping.po} (${mapping.weight})`).join(', ') : 'No PO mapping'}</td>
+                </tr>
+            `).join('');
+
+            const poSummary = subject.poMapping.length
+                ? subject.poMapping.map((mapping) => `
+                    <span class="copo-po-pill">${mapping.po}: ${mapping.percentage}% (${mapping.grade})</span>
+                `).join('')
+                : '<span class="text-muted">No PO mapping configured</span>';
+
+            return `
+                <div class="copo-subject-card">
+                    <div class="copo-subject-head">
+                        <div>
+                            <h3>${subject.subject}</h3>
+                            <p>${subject.subjectCode} · ${subject.subjectType} · Semester ${subject.semester}</p>
+                        </div>
+                        <div class="copo-attainment-box">
+                            <span class="text-sm text-muted">Attainment</span>
+                            <strong>${subject.attainmentPercentage}%</strong>
+                        </div>
+                    </div>
+
+                    <div class="copo-subject-meta">
+                        <span><strong>Marks:</strong> ${subject.marks} / ${subject.maxMarks}</span>
+                        <span><strong>Overall %:</strong> ${subject.percentage}%</span>
+                        <span><strong>Grade:</strong> ${subject.grade}</span>
+                    </div>
+
+                    <div class="copo-po-summary">
+                        <strong>PO Mapping:</strong>
+                        <div class="copo-po-pill-wrap">${poSummary}</div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>CO</th>
+                                    <th>Value</th>
+                                    <th>Result</th>
+                                    <th>Grade</th>
+                                    <th>PO Mapping</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${coRows || '<tr><td colspan="5" class="text-center text-muted">No CO data found</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function loadReport(searchValue) {
+        showFeedback('Loading CO/PO report...', 'info');
+        reportSection.style.display = 'none';
+
+        try {
+            const response = await fetch(`/api/copo/${encodeURIComponent(searchValue)}`);
+            const payload = await response.json();
+
+            if (!response.ok) {
+                throw new Error(payload.error || 'Failed to fetch CO/PO report.');
+            }
+
+            clearFeedback();
+            renderStudentSummary(payload.student);
+            renderCharts(payload.charts);
+            renderDetails(payload.subjects);
+            reportSection.style.display = 'block';
+        } catch (error) {
+            reportSection.style.display = 'none';
+            showFeedback(error.message || 'Failed to load CO/PO report.', 'error');
+        }
+    }
+
+    searchForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const searchValue = searchInput.value.trim();
+
+        if (!searchValue) {
+            showFeedback('Enter a student name or ID to search.', 'error');
+            return;
+        }
+
+        loadReport(searchValue);
+    });
+</script>
+
+<%- include('../partials/footer') %>

@@ -138,3 +138,40 @@ CREATE INDEX IF NOT EXISTS idx_marks_subject      ON marks(subject_id);
 CREATE INDEX IF NOT EXISTS idx_subjects_branch    ON subjects(branch_id, semester);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, is_read);
 CREATE INDEX IF NOT EXISTS idx_pw_resets_token    ON password_resets(token);
+
+
+-- ===============================
+-- CO TABLE
+-- ===============================
+CREATE TABLE IF NOT EXISTS co (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  subject_id INTEGER,
+  name TEXT
+);
+
+-- ===============================
+-- CO ATTAINMENT (per student)
+-- ===============================
+CREATE TABLE IF NOT EXISTS co_attainment (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  student_id INTEGER,
+  subject_id INTEGER,
+  co_id INTEGER,
+  percentage REAL,
+  level INTEGER
+);
+
+-- ===============================
+-- CO → PO MAPPING
+-- ===============================
+CREATE TABLE IF NOT EXISTS co_po (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  co_id INTEGER,
+  po TEXT,
+  weight INTEGER
+);
+
+INSERT INTO co (subject_id, name) VALUES
+(1, 'CO1'),
+(1, 'CO2'),
+(1, 'CO3');

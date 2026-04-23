@@ -19,6 +19,10 @@
     <% if (subjects.length) { %>
     <div class="subject-cards-grid">
         <% subjects.forEach(sub => { %>
+            <div class="subject-card-actions">
+                <a class="btn btn-sm btn-primary" href="/marks/co/<%= sub.id %>">CO</a>
+                <a class="btn btn-sm btn-success" href="/marks/po/<%= sub.id %>">PO</a>
+            </div>
         <div class="subject-card subject-<%= sub.type.toLowerCase() %>">
             <div class="subject-card-top">
                 <span class="subject-type-tag"><%= sub.type %></span>
@@ -30,6 +34,7 @@
             <div class="subject-card-actions">
                 <a href="/professor/subject/<%= sub.id %>/students" class="btn btn-sm btn-primary">Enter Marks</a>
                 <a href="/marks/export/excel/<%= sub.id %>" class="btn btn-sm btn-outline">Export</a>
+                <a href="/marks/report/<%= sub.id %>" class="btn">View Report</a>
             </div>
         </div>
         <% }) %>
@@ -67,3 +72,4 @@
 </div>
 
 <%- include('../partials/footer') %>
+
